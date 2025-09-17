@@ -89,7 +89,7 @@ function SimpleKavo.CreateLib(title, themeName)
         table.insert(themeNames, name)
     end
     
-    local guiName = "SimpleKavo_Test" -- Fixed name for debugging
+    local guiName = "SimpleKavo_Test"
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = guiName
     ScreenGui.ResetOnSpawn = false
@@ -115,6 +115,7 @@ function SimpleKavo.CreateLib(title, themeName)
     Main.Position = UDim2.new(0.3, 0, 0.3, 0)
     Main.Size = UDim2.new(0, 500, 0, 350)
     Main.ClipsDescendants = true
+    Main.ZIndex = 10
     
     local MainCorner = Instance.new("UICorner")
     MainCorner.CornerRadius = UDim.new(0, 6)
@@ -125,6 +126,8 @@ function SimpleKavo.CreateLib(title, themeName)
     Header.Parent = Main
     Header.BackgroundColor3 = currentTheme.Header
     Header.Size = UDim2.new(1, 0, 0, 30)
+    Header.ClipsDescendants = false
+    Header.ZIndex = 10
     
     local HeaderCorner = Instance.new("UICorner")
     HeaderCorner.CornerRadius = UDim.new(0, 6)
@@ -140,13 +143,14 @@ function SimpleKavo.CreateLib(title, themeName)
     Title.TextColor3 = currentTheme.TextColor
     Title.TextSize = 16
     Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.ZIndex = 11
     
     local ThemeDropdownFrame = Instance.new("Frame")
     ThemeDropdownFrame.Parent = Header
     ThemeDropdownFrame.BackgroundTransparency = 1
     ThemeDropdownFrame.Position = UDim2.new(0.5, 0, 0, 0)
     ThemeDropdownFrame.Size = UDim2.new(0.35, 0, 1, 0)
-    ThemeDropdownFrame.ZIndex = 20
+    ThemeDropdownFrame.ZIndex = 100
     
     local ThemeButton = Instance.new("TextButton")
     ThemeButton.Parent = ThemeDropdownFrame
@@ -158,6 +162,7 @@ function SimpleKavo.CreateLib(title, themeName)
     ThemeButton.TextColor3 = currentTheme.TextColor
     ThemeButton.TextSize = 12
     ThemeButton.AutoButtonColor = false
+    ThemeButton.ZIndex = 101
     
     local ThemeButtonCorner = Instance.new("UICorner")
     ThemeButtonCorner.CornerRadius = UDim.new(0, 4)
@@ -170,7 +175,7 @@ function SimpleKavo.CreateLib(title, themeName)
     ThemeOptionsFrame.Size = UDim2.new(1, -10, 0, 0)
     ThemeOptionsFrame.Visible = false
     ThemeOptionsFrame.ClipsDescendants = true
-    ThemeOptionsFrame.ZIndex = 19
+    ThemeOptionsFrame.ZIndex = 100
     
     local ThemeOptionsCorner = Instance.new("UICorner")
     ThemeOptionsCorner.CornerRadius = UDim.new(0, 4)
@@ -237,7 +242,7 @@ function SimpleKavo.CreateLib(title, themeName)
             OptionButton.TextColor3 = currentTheme.TextColor
             OptionButton.TextSize = 12
             OptionButton.AutoButtonColor = false
-            OptionButton.ZIndex = 1
+            OptionButton.ZIndex = 101
             
             local OptionCorner = Instance.new("UICorner")
             OptionCorner.CornerRadius = UDim.new(0, 4)
@@ -278,6 +283,25 @@ function SimpleKavo.CreateLib(title, themeName)
         end
     end)
     
+    local dropdownConnection
+    dropdownConnection = UserInputService.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and isThemeOpen then
+            local pos = input.Position
+            local framePos = ThemeDropdownFrame.AbsolutePosition
+            local frameSize = ThemeDropdownFrame.AbsoluteSize
+            if not (pos.X >= framePos.X and pos.X <= framePos.X + frameSize.X and
+                    pos.Y >= framePos.Y and pos.Y <= framePos.Y + frameSize.Y) then
+                isThemeOpen = false
+                ThemeOptionsFrame.Visible = false
+                Tween(ThemeOptionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.2)
+            end
+        end
+    end)
+    
+    ThemeOptionsFrame.Destroying:Connect(function()
+        dropdownConnection:Disconnect()
+    end)
+    
     local Close = Instance.new("ImageButton")
     Close.Parent = Header
     Close.BackgroundTransparency = 1
@@ -287,6 +311,7 @@ function SimpleKavo.CreateLib(title, themeName)
     Close.Image = "rbxassetid://3926305904"
     Close.ImageRectOffset = Vector2.new(284, 4)
     Close.ImageRectSize = Vector2.new(24, 24)
+    Close.ZIndex = 11
     Close.MouseButton1Click:Connect(function()
         Tween(Main, {Size = UDim2.new(0, 0, 0, 0)})
         task.wait(0.3)
@@ -302,6 +327,7 @@ function SimpleKavo.CreateLib(title, themeName)
     Minimize.Position = UDim2.new(0.3, -45, 0.3, -50)
     Minimize.Image = "rbxassetid://133706910567742"
     Minimize.ImageColor3 = currentTheme.TextColor
+    Minimize.ZIndex = 10
 
     local MinimizeStroke = Instance.new("UIStroke")
     MinimizeStroke.Color = Color3.fromRGB(0, 0, 0)
@@ -340,6 +366,7 @@ function SimpleKavo.CreateLib(title, themeName)
     TabsScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabsScroll.ScrollingDirection = Enum.ScrollingDirection.Y
     TabsScroll.VerticalScrollBarInset = Enum.ScrollBarInset.Always
+    TabsScroll.ZIndex = 10
 
     local TabsHolder = Instance.new("Frame")
     TabsHolder.Name = "TabsHolder"
@@ -347,6 +374,7 @@ function SimpleKavo.CreateLib(title, themeName)
     TabsHolder.BackgroundTransparency = 1
     TabsHolder.Size = UDim2.new(1, 0, 0, 0)
     TabsHolder.AutomaticSize = Enum.AutomaticSize.Y
+    TabsHolder.ZIndex = 10
 
     local TabsList = Instance.new("UIListLayout")
     TabsList.Parent = TabsHolder
@@ -367,6 +395,7 @@ function SimpleKavo.CreateLib(title, themeName)
     Content.BackgroundTransparency = 1
     Content.Position = UDim2.new(0, 150, 0, 30)
     Content.Size = UDim2.new(1, -150, 1, -30)
+    Content.ZIndex = 10
     
     local tabsOrder = {}
     local currentTab = nil
@@ -384,6 +413,7 @@ function SimpleKavo.CreateLib(title, themeName)
         TabButton.AnchorPoint = Vector2.new(0.5, 0)
         TabButton.Position = UDim2.new(0.35, -10, 0, 0)
         TabButton.LayoutOrder = #tabsOrder + 1
+        TabButton.ZIndex = 11
         
         local TabCorner = Instance.new("UICorner")
         TabCorner.CornerRadius = UDim.new(0, 4)
@@ -399,6 +429,7 @@ function SimpleKavo.CreateLib(title, themeName)
         TabContent.ScrollBarImageColor3 = currentTheme.SchemeColor
         TabContent.CanvasSize = UDim2.new(0, 0, 0, 0)
         TabContent.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        TabContent.ZIndex = 10
         
         local TabContentList = Instance.new("UIListLayout")
         TabContentList.Parent = TabContent
@@ -435,12 +466,14 @@ function SimpleKavo.CreateLib(title, themeName)
             SectionFrame.BackgroundTransparency = 1
             SectionFrame.Size = UDim2.new(0.9, 0, 0, 0)
             SectionFrame.AutomaticSize = Enum.AutomaticSize.Y
+            SectionFrame.ZIndex = 10
             
             local SectionHeader = Instance.new("Frame")
             SectionHeader.Name = "Header"
             SectionHeader.Parent = SectionFrame
             SectionHeader.BackgroundTransparency = 1
             SectionHeader.Size = UDim2.new(1, 0, 0, 30)
+            SectionHeader.ZIndex = 10
             
             local SectionLabel = Instance.new("TextLabel")
             SectionLabel.Name = "Label"
@@ -452,6 +485,7 @@ function SimpleKavo.CreateLib(title, themeName)
             SectionLabel.TextColor3 = currentTheme.TextColor
             SectionLabel.TextSize = 14
             SectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+            SectionLabel.ZIndex = 11
             
             local SectionLine = Instance.new("Frame")
             SectionLine.Name = "Line"
@@ -460,6 +494,7 @@ function SimpleKavo.CreateLib(title, themeName)
             SectionLine.BorderSizePixel = 0
             SectionLine.Position = UDim2.new(0, 0, 1, -2)
             SectionLine.Size = UDim2.new(1, 0, 0, 1)
+            SectionLine.ZIndex = 10
             
             local SectionContent = Instance.new("Frame")
             SectionContent.Name = "Content"
@@ -468,6 +503,7 @@ function SimpleKavo.CreateLib(title, themeName)
             SectionContent.Position = UDim2.new(0, 0, 0, 35)
             SectionContent.Size = UDim2.new(1, 0, 0, 0)
             SectionContent.AutomaticSize = Enum.AutomaticSize.Y
+            SectionContent.ZIndex = 10
             
             local SectionList = Instance.new("UIListLayout")
             SectionList.Parent = SectionContent
@@ -489,6 +525,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 Button.TextSize = 14
                 Button.AutoButtonColor = false
                 Button.LayoutOrder = elementOrder
+                Button.ZIndex = 11
                 
                 if description then
                     local DescLabel = Instance.new("TextLabel")
@@ -502,6 +539,7 @@ function SimpleKavo.CreateLib(title, themeName)
                     DescLabel.TextColor3 = currentTheme.TextColor
                     DescLabel.TextSize = 10
                     DescLabel.TextXAlignment = Enum.TextXAlignment.Left
+                    DescLabel.ZIndex = 11
                 end
                 
                 local ButtonCorner = Instance.new("UICorner")
@@ -538,6 +576,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 ToggleFrame.BackgroundTransparency = 1
                 ToggleFrame.Size = UDim2.new(1, 0, 0, description and 50 or 35)
                 ToggleFrame.LayoutOrder = elementOrder
+                ToggleFrame.ZIndex = 10
                 
                 local ToggleButton = Instance.new("TextButton")
                 ToggleButton.Name = "Button"
@@ -550,6 +589,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 ToggleButton.TextColor3 = currentTheme.TextColor
                 ToggleButton.TextSize = 14
                 ToggleButton.AutoButtonColor = false
+                ToggleButton.ZIndex = 11
                 
                 local ToggleCorner = Instance.new("UICorner")
                 ToggleCorner.CornerRadius = UDim.new(0, 4)
@@ -566,6 +606,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 ToggleText.TextColor3 = currentTheme.TextColor
                 ToggleText.TextSize = 14
                 ToggleText.TextXAlignment = Enum.TextXAlignment.Left
+                ToggleText.ZIndex = 11
                 
                 if description then
                     local DescLabel = Instance.new("TextLabel")
@@ -579,6 +620,7 @@ function SimpleKavo.CreateLib(title, themeName)
                     DescLabel.TextColor3 = currentTheme.TextColor
                     DescLabel.TextSize = 10
                     DescLabel.TextXAlignment = Enum.TextXAlignment.Left
+                    DescLabel.ZIndex = 11
                 end
                 
                 local State = false
@@ -614,6 +656,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 DropdownFrame.Size = UDim2.new(1, 0, 0, 35)
                 DropdownFrame.ClipsDescendants = true
                 DropdownFrame.LayoutOrder = elementOrder
+                DropdownFrame.ZIndex = 10
                 
                 local MainButton = Instance.new("TextButton")
                 MainButton.Name = "MainButton"
@@ -626,6 +669,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 MainButton.TextSize = 14
                 MainButton.TextXAlignment = Enum.TextXAlignment.Left
                 MainButton.AutoButtonColor = false
+                MainButton.ZIndex = 11
                 
                 local ButtonCorner = Instance.new("UICorner")
                 ButtonCorner.CornerRadius = UDim.new(0, 4)
@@ -641,6 +685,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 Arrow.TextColor3 = currentTheme.TextColor
                 Arrow.Font = Enum.Font.Gotham
                 Arrow.TextSize = 14
+                Arrow.ZIndex = 11
                 
                 local OptionsFrame = Instance.new("Frame")
                 OptionsFrame.Name = "OptionsFrame"
@@ -650,6 +695,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 OptionsFrame.Size = UDim2.new(1, 0, 0, 0)
                 OptionsFrame.Visible = false
                 OptionsFrame.ClipsDescendants = true
+                OptionsFrame.ZIndex = 100
                 
                 local OptionsCorner = Instance.new("UICorner")
                 OptionsCorner.CornerRadius = UDim.new(0, 4)
@@ -674,6 +720,7 @@ function SimpleKavo.CreateLib(title, themeName)
                         NoOptions.TextColor3 = currentTheme.TextColor
                         NoOptions.Font = Enum.Font.Gotham
                         NoOptions.TextSize = 12
+                        NoOptions.ZIndex = 101
                         return
                     end
                     
@@ -689,6 +736,7 @@ function SimpleKavo.CreateLib(title, themeName)
                         OptionButton.TextColor3 = currentTheme.TextColor
                         OptionButton.TextSize = 14
                         OptionButton.AutoButtonColor = false
+                        OptionButton.ZIndex = 101
                         
                         local OptionCorner = Instance.new("UICorner")
                         OptionCorner.CornerRadius = UDim.new(0, 4)
@@ -791,6 +839,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 SliderFrame.BackgroundTransparency = 1
                 SliderFrame.Size = UDim2.new(1, 0, 0, 50)
                 SliderFrame.LayoutOrder = elementOrder
+                SliderFrame.ZIndex = 10
                 
                 local SliderText = Instance.new("TextLabel")
                 SliderText.Name = "Text"
@@ -802,6 +851,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 SliderText.TextColor3 = currentTheme.TextColor
                 SliderText.TextSize = 14
                 SliderText.TextXAlignment = Enum.TextXAlignment.Left
+                SliderText.ZIndex = 11
                 
                 local SliderBar = Instance.new("Frame")
                 SliderBar.Name = "Bar"
@@ -809,6 +859,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 SliderBar.BackgroundColor3 = currentTheme.ElementColor
                 SliderBar.Size = UDim2.new(1, 0, 0.2, 0)
                 SliderBar.Position = UDim2.new(0, 0, 0.6, 0)
+                SliderBar.ZIndex = 10
                 
                 local SliderCorner = Instance.new("UICorner")
                 SliderCorner.Parent = SliderBar
@@ -818,6 +869,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 SliderFill.Parent = SliderBar
                 SliderFill.BackgroundColor3 = currentTheme.SchemeColor
                 SliderFill.Size = UDim2.new((default - min)/(max - min), 0, 1, 0)
+                SliderFill.ZIndex = 10
                 
                 local SliderFillCorner = Instance.new("UICorner")
                 SliderFillCorner.Parent = SliderFill
