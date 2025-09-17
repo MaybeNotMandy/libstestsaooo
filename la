@@ -168,13 +168,14 @@ function SimpleKavo.CreateLib(title, themeName)
     ThemeButtonCorner.Parent = ThemeButton
     
     local ThemeOptionsFrame = Instance.new("Frame")
-    ThemeOptionsFrame.Parent = ThemeDropdownFrame
+    ThemeOptionsFrame.Parent = ScreenGui
+    ThemeOptionsFrame.Name = "ThemeOptionsFrame"
     ThemeOptionsFrame.BackgroundColor3 = currentTheme.ElementColor
-    ThemeOptionsFrame.Position = UDim2.new(0, 5, 0, 25)
-    ThemeOptionsFrame.Size = UDim2.new(1, -10, 0, 0)
+    ThemeOptionsFrame.Position = UDim2.new(0, 0, 0, 0)
+    ThemeOptionsFrame.Size = UDim2.new(0, 0, 0, 0)
     ThemeOptionsFrame.Visible = false
     ThemeOptionsFrame.ClipsDescendants = true
-    ThemeOptionsFrame.ZIndex = 12
+    ThemeOptionsFrame.ZIndex = 100
     
     local ThemeOptionsCorner = Instance.new("UICorner")
     ThemeOptionsCorner.CornerRadius = UDim.new(0, 4)
@@ -185,6 +186,7 @@ function SimpleKavo.CreateLib(title, themeName)
     ThemeOptionsList.Padding = UDim.new(0, 2)
     
     local isThemeOpen = false
+    local themeConnection
     
     local function updateTheme(newThemeName)
         if not Themes[newThemeName] then return end
@@ -241,7 +243,7 @@ function SimpleKavo.CreateLib(title, themeName)
             OptionButton.TextColor3 = currentTheme.TextColor
             OptionButton.TextSize = 12
             OptionButton.AutoButtonColor = false
-            OptionButton.ZIndex = 13
+            OptionButton.ZIndex = 101
             
             local OptionCorner = Instance.new("UICorner")
             OptionCorner.CornerRadius = UDim.new(0, 4)
@@ -251,7 +253,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 updateTheme(theme)
                 isThemeOpen = false
                 ThemeOptionsFrame.Visible = false
-                Tween(ThemeOptionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.2)
+                Tween(ThemeOptionsFrame, {Size = UDim2.new(0, 0, 0, 0)}, 0.2)
             end)
             
             OptionButton.MouseEnter:Connect(function()
@@ -272,13 +274,45 @@ function SimpleKavo.CreateLib(title, themeName)
     
     ThemeButton.MouseButton1Click:Connect(function()
         isThemeOpen = not isThemeOpen
+        local dropdownWidth = ThemeDropdownFrame.AbsoluteSize.X - 10
+        local buttonPos = ThemeButton.AbsolutePosition
+        local buttonSize = ThemeButton.AbsoluteSize
         if isThemeOpen then
+            ThemeOptionsFrame.Position = UDim2.new(0, buttonPos.X + 5, 0, buttonPos.Y + buttonSize.Y + 2)
+            ThemeOptionsFrame.Size = UDim2.new(0, dropdownWidth, 0, 0)
             ThemeOptionsFrame.Visible = true
-            Tween(ThemeOptionsFrame, {Size = UDim2.new(1, 0, 0, #themeNames * 22)}, 0.2)
+            Tween(ThemeOptionsFrame, {Size = UDim2.new(0, dropdownWidth, 0, #themeNames * 22)}, 0.2)
         else
-            Tween(ThemeOptionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.2)
+            Tween(ThemeOptionsFrame, {Size = UDim2.new(0, dropdownWidth, 0, 0)}, 0.2)
             task.wait(0.2)
             ThemeOptionsFrame.Visible = false
+        end
+    end)
+    
+    themeConnection = UserInputService.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and isThemeOpen then
+            local pos = input.Position
+            local framePos = ThemeOptionsFrame.AbsolutePosition
+            local frameSize = ThemeOptionsFrame.AbsoluteSize
+            local buttonPos = ThemeButton.AbsolutePosition
+            local buttonSize = ThemeButton.AbsoluteSize
+            local inOptions = (pos.X >= framePos.X and pos.X <= framePos.X + frameSize.X and
+                              pos.Y >= framePos.Y and pos.Y <= framePos.Y + frameSize.Y)
+            local inButton = (pos.X >= buttonPos.X and pos.X <= buttonPos.X + buttonSize.X and
+                             pos.Y >= buttonPos.Y and pos.Y <= buttonPos.Y + buttonSize.Y)
+            if not inOptions and not inButton then
+                isThemeOpen = false
+                local dropdownWidth = ThemeDropdownFrame.AbsoluteSize.X - 10
+                Tween(ThemeOptionsFrame, {Size = UDim2.new(0, dropdownWidth, 0, 0)}, 0.2)
+                task.wait(0.2)
+                ThemeOptionsFrame.Visible = false
+            end
+        end
+    end)
+    
+    ThemeOptionsFrame.Destroying:Connect(function()
+        if themeConnection then
+            themeConnection:Disconnect()
         end
     end)
     
