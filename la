@@ -237,7 +237,7 @@ function SimpleKavo.CreateLib(title, themeName)
             OptionButton.TextColor3 = currentTheme.TextColor
             OptionButton.TextSize = 12
             OptionButton.AutoButtonColor = false
-            OptionButton.ZIndex = 11
+            OptionButton.ZIndex = 1
             
             local OptionCorner = Instance.new("UICorner")
             OptionCorner.CornerRadius = UDim.new(0, 4)
