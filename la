@@ -170,7 +170,7 @@ function SimpleKavo.CreateLib(title, themeName)
     ThemeOptionsFrame.Size = UDim2.new(1, -10, 0, 0)
     ThemeOptionsFrame.Visible = false
     ThemeOptionsFrame.ClipsDescendants = true
-    ThemeOptionsFrame.ZIndex = 10
+    ThemeOptionsFrame.ZIndex = 19
     
     local ThemeOptionsCorner = Instance.new("UICorner")
     ThemeOptionsCorner.CornerRadius = UDim.new(0, 4)
