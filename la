@@ -149,7 +149,7 @@ function SimpleKavo.CreateLib(title, themeName)
     ThemeDropdownFrame.BackgroundTransparency = 1
     ThemeDropdownFrame.Position = UDim2.new(0.5, 0, 0, 0)
     ThemeDropdownFrame.Size = UDim2.new(0.35, 0, 1, 0)
-    ThemeDropdownFrame.ZIndex = 10
+    ThemeDropdownFrame.ZIndex = 100
     
     local ThemeButton = Instance.new("TextButton")
     ThemeButton.Parent = ThemeDropdownFrame
@@ -161,11 +161,12 @@ function SimpleKavo.CreateLib(title, themeName)
     ThemeButton.TextColor3 = currentTheme.TextColor
     ThemeButton.TextSize = 12
     ThemeButton.AutoButtonColor = false
-    ThemeButton.ZIndex = 11
+    ThemeButton.ZIndex = 101
     
     local ThemeButtonCorner = Instance.new("UICorner")
     ThemeButtonCorner.CornerRadius = UDim.new(0, 4)
     ThemeButtonCorner.Parent = ThemeButton
+    ThemeButtonCorner.ZIndex = 101
     
     local ThemeOptionsFrame = Instance.new("Frame")
     ThemeOptionsFrame.Parent = ThemeDropdownFrame
@@ -174,15 +175,17 @@ function SimpleKavo.CreateLib(title, themeName)
     ThemeOptionsFrame.Size = UDim2.new(1, -10, 0, 0)
     ThemeOptionsFrame.Visible = false
     ThemeOptionsFrame.ClipsDescendants = true
-    ThemeOptionsFrame.ZIndex = 12
+    ThemeOptionsFrame.ZIndex = 102
     
     local ThemeOptionsCorner = Instance.new("UICorner")
     ThemeOptionsCorner.CornerRadius = UDim.new(0, 4)
     ThemeOptionsCorner.Parent = ThemeOptionsFrame
+    ThemeOptionsCorner.ZIndex = 102
     
     local ThemeOptionsList = Instance.new("UIListLayout")
     ThemeOptionsList.Parent = ThemeOptionsFrame
     ThemeOptionsList.Padding = UDim.new(0, 2)
+    ThemeOptionsList.ZIndex = 102
     
     local isThemeOpen = false
     
@@ -241,11 +244,12 @@ function SimpleKavo.CreateLib(title, themeName)
             OptionButton.TextColor3 = currentTheme.TextColor
             OptionButton.TextSize = 12
             OptionButton.AutoButtonColor = false
-            OptionButton.ZIndex = 13
+            OptionButton.ZIndex = 103
             
             local OptionCorner = Instance.new("UICorner")
             OptionCorner.CornerRadius = UDim.new(0, 4)
             OptionCorner.Parent = OptionButton
+            OptionCorner.ZIndex = 103
             
             OptionButton.MouseButton1Click:Connect(function()
                 updateTheme(theme)
