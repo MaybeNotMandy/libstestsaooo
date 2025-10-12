@@ -836,7 +836,7 @@ function SectionFunctions:NewTextBox(name, placeholder, callback)
                 TextBox.Parent = TextBoxFrame
                 TextBox.BackgroundColor3 = currentTheme.ElementColor
                 TextBox.Size = UDim2.new(1, 0, 0, 30)
-                TextBox.Position = UDim2.new(0, 0, 0, 5)
+                TextBox.Position = UDim2.new(0, 0, 0, -5)
                 TextBox.Font = Enum.Font.Gotham
                 TextBox.PlaceholderText = placeholder or "Enter text..."
                 TextBox.Text = ""
