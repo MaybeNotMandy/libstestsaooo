@@ -856,7 +856,7 @@ function SectionFunctions:NewTextBox(name, placeholder, callback)
                 TextBoxLabel.Parent = TextBoxFrame
                 TextBoxLabel.BackgroundTransparency = 1
                 TextBoxLabel.Size = UDim2.new(1, 0, 0, 20)
-                TextBoxLabel.Position = UDim2.new(0, 10, 0, 15)
+                TextBoxLabel.Position = UDim2.new(0, 10, 0, 20)
                 TextBoxLabel.Font = Enum.Font.Gotham
                 TextBoxLabel.Text = name
                 TextBoxLabel.TextColor3 = currentTheme.TextColor
