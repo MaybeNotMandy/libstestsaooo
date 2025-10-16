@@ -1,3 +1,5 @@
+veja, quando boto o halloween theme os elementos como os botões dos toggles e etc  ficam na cor scheme antes mesmos de serem ativados
+
 local SimpleKavo = {}
 
 -- Serviços
