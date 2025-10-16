@@ -184,44 +184,52 @@ function SimpleKavo.CreateLib(title, themeName)
     local isThemeOpen = false
     
     local function updateTheme(newThemeName)
-        if not Themes[newThemeName] then return end
-        currentTheme = Themes[newThemeName]
-        ThemeButton.Text = newThemeName
-        
-        Main.BackgroundColor3 = currentTheme.Background
-        Header.BackgroundColor3 = currentTheme.Header
-        Title.TextColor3 = currentTheme.TextColor
-        ThemeButton.BackgroundColor3 = currentTheme.ElementColor
-        ThemeButton.TextColor3 = currentTheme.TextColor
-        ThemeOptionsFrame.BackgroundColor3 = currentTheme.ElementColor
-        TabsScroll.ScrollBarImageColor3 = currentTheme.SchemeColor
-        
-        for _, tab in pairs(TabsHolder:GetChildren()) do
-            if tab:IsA("TextButton") then
-                tab.TextColor3 = currentTheme.TextColor
-                tab.BackgroundColor3 = (tab.BackgroundColor3 == currentTheme.SchemeColor) and currentTheme.SchemeColor or currentTheme.ElementColor
-            end
+    if not Themes[newThemeName] then return end
+    currentTheme = Themes[newThemeName]
+    ThemeButton.Text = newThemeName
+    
+    -- Atualiza cores principais
+    Main.BackgroundColor3 = currentTheme.Background
+    Header.BackgroundColor3 = currentTheme.Header
+    Title.TextColor3 = currentTheme.TextColor
+    ThemeButton.BackgroundColor3 = currentTheme.ElementColor
+    ThemeButton.TextColor3 = currentTheme.TextColor
+    ThemeOptionsFrame.BackgroundColor3 = currentTheme.ElementColor
+    TabsScroll.ScrollBarImageColor3 = currentTheme.SchemeColor
+    
+    -- Atualiza cores dos botões de abas
+    for _, tab in pairs(TabsHolder:GetChildren()) do
+        if tab:IsA("TextButton") then
+            tab.TextColor3 = currentTheme.TextColor
+            tab.BackgroundColor3 = (tab.BackgroundColor3 == currentTheme.SchemeColor) and currentTheme.SchemeColor or currentTheme.ElementColor
         end
-        
-        local function updateContent(frame)
-            for _, child in pairs(frame:GetChildren()) do
-                if child:IsA("TextLabel") or child:IsA("TextButton") then
-                    child.TextColor3 = currentTheme.TextColor
-                    if child.Name ~= "Fill" and child.Name ~= "Bar" then
-                        child.BackgroundColor3 = (child.BackgroundColor3 == currentTheme.SchemeColor) and currentTheme.SchemeColor or currentTheme.ElementColor
-                    elseif child.Name == "Fill" then
-                        child.BackgroundColor3 = currentTheme.SchemeColor
-                    elseif child.Name == "Bar" then
-                        child.BackgroundColor3 = currentTheme.ElementColor
-                    end
-                elseif child:IsA("Frame") and child.Name == "Line" then
-                    child.BackgroundColor3 = currentTheme.SchemeColor
-                end
-                updateContent(child)
-            end
-        end
-        updateContent(Content)
     end
+    
+    -- Função recursiva para atualizar elementos de conteúdo
+    local function updateContent(frame)
+        for _, child in pairs(frame:GetChildren()) do
+            if child:IsA("TextLabel") or child:IsA("TextButton") then
+                child.TextColor3 = currentTheme.TextColor
+                if child.Name == "Button" and child.Parent.Name:match("_Toggle$") then
+                    -- Para toggles, verifica o estado antes de atualizar a cor
+                    local toggleFrame = child.Parent
+                    local state = toggleFrame.State or false -- Assume que o estado é armazenado no frame
+                    child.BackgroundColor3 = state and currentTheme.SchemeColor or currentTheme.ElementColor
+                elseif child.Name ~= "Fill" and child.Name ~= "Bar" then
+                    child.BackgroundColor3 = (child.BackgroundColor3 == currentTheme.SchemeColor) and currentTheme.SchemeColor or currentTheme.ElementColor
+                elseif child.Name == "Fill" then
+                    child.BackgroundColor3 = currentTheme.SchemeColor
+                elseif child.Name == "Bar" then
+                    child.BackgroundColor3 = currentTheme.ElementColor
+                end
+            elseif child:IsA("Frame") and child.Name == "Line" then
+                child.BackgroundColor3 = currentTheme.SchemeColor
+            end
+            updateContent(child)
+        end
+    end
+    updateContent(Content)
+end
     
     local function createThemeOptions()
         for _, child in pairs(ThemeOptionsFrame:GetChildren()) do
@@ -559,81 +567,81 @@ function SimpleKavo.CreateLib(title, themeName)
             end
             
             function SectionFunctions:NewToggle(name, description, callback)
-                local elementOrder = #SectionContent:GetChildren()
-                
-                local ToggleFrame = Instance.new("Frame")
-                ToggleFrame.Name = name .. "_Toggle"
-                ToggleFrame.BackgroundTransparency = 1
-                ToggleFrame.Size = UDim2.new(1, 0, 0, description and 50 or 35)
-                ToggleFrame.LayoutOrder = elementOrder
-                ToggleFrame.ZIndex = 6
-                
-                local ToggleButton = Instance.new("TextButton")
-                ToggleButton.Name = "Button"
-                ToggleButton.Parent = ToggleFrame
-                ToggleButton.BackgroundColor3 = currentTheme.ElementColor
-                ToggleButton.Size = UDim2.new(0, 30, 0, 30)
-                ToggleButton.Position = UDim2.new(1, -35, 0, 2)
-                ToggleButton.Font = Enum.Font.Gotham
-                ToggleButton.Text = ""
-                ToggleButton.TextColor3 = currentTheme.TextColor
-                ToggleButton.TextSize = 14
-                ToggleButton.AutoButtonColor = false
-                ToggleButton.ZIndex = 7
-                
-                local ToggleCorner = Instance.new("UICorner")
-                ToggleCorner.CornerRadius = UDim.new(0, 4)
-                ToggleCorner.Parent = ToggleButton
-                
-                local ToggleText = Instance.new("TextLabel")
-                ToggleText.Name = "Text"
-                ToggleText.Parent = ToggleFrame
-                ToggleText.BackgroundTransparency = 1
-                ToggleText.Position = UDim2.new(0, 10, 0, 0)
-                ToggleText.Size = UDim2.new(0.7, 0, 0, 35)
-                ToggleText.Font = Enum.Font.Gotham
-                ToggleText.Text = name
-                ToggleText.TextColor3 = currentTheme.TextColor
-                ToggleText.TextSize = 14
-                ToggleText.TextXAlignment = Enum.TextXAlignment.Left
-                ToggleText.ZIndex = 7
-                
-                if description then
-                    local DescLabel = Instance.new("TextLabel")
-                    DescLabel.Name = "Description"
-                    DescLabel.Parent = ToggleFrame
-                    DescLabel.BackgroundTransparency = 1
-                    DescLabel.Position = UDim2.new(0, 10, 0, 25)
-                    DescLabel.Size = UDim2.new(0.7, 0, 0, 15)
-                    DescLabel.Font = Enum.Font.Gotham
-                    DescLabel.Text = description
-                    DescLabel.TextColor3 = currentTheme.TextColor
-                    DescLabel.TextSize = 10
-                    DescLabel.TextXAlignment = Enum.TextXAlignment.Left
-                    DescLabel.ZIndex = 7
-                end
-                
-                local State = false
-                
-                local function UpdateToggle()
-                    if State then
-                        Tween(ToggleButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
-                    else
-                        Tween(ToggleButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.2)
-                    end
-                end
-                
-                UpdateToggle()
-                
-                ToggleButton.MouseButton1Click:Connect(function()
-                    State = not State
-                    UpdateToggle()
-                    if callback then callback(State) end
-                end)
-                
-                ToggleFrame.Parent = SectionContent
-                return ToggleFrame
-            end
+    local elementOrder = #SectionContent:GetChildren()
+    
+    local ToggleFrame = Instance.new("Frame")
+    ToggleFrame.Name = name .. "_Toggle"
+    ToggleFrame.BackgroundTransparency = 1
+    ToggleFrame.Size = UDim2.new(1, 0, 0, description and 50 or 35)
+    ToggleFrame.LayoutOrder = elementOrder
+    ToggleFrame.ZIndex = 6
+    
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Name = "Button"
+    ToggleButton.Parent = ToggleFrame
+    ToggleButton.BackgroundColor3 = currentTheme.ElementColor
+    ToggleButton.Size = UDim2.new(0, 30, 0, 30)
+    ToggleButton.Position = UDim2.new(1, -35, 0, 2)
+    ToggleButton.Font = Enum.Font.Gotham
+    ToggleButton.Text = ""
+    ToggleButton.TextColor3 = currentTheme.TextColor
+    ToggleButton.TextSize = 14
+    ToggleButton.AutoButtonColor = false
+    ToggleButton.ZIndex = 7
+    
+    local ToggleCorner = Instance.new("UICorner")
+    ToggleCorner.CornerRadius = UDim.new(0, 4)
+    ToggleCorner.Parent = ToggleButton
+    
+    local ToggleText = Instance.new("TextLabel")
+    ToggleText.Name = "Text"
+    ToggleText.Parent = ToggleFrame
+    ToggleText.BackgroundTransparency = 1
+    ToggleText.Position = UDim2.new(0, 10, 0, 0)
+    ToggleText.Size = UDim2.new(0.7, 0, 0, 35)
+    ToggleText.Font = Enum.Font.Gotham
+    ToggleText.Text = name
+    ToggleText.TextColor3 = currentTheme.TextColor
+    ToggleText.TextSize = 14
+    ToggleText.TextXAlignment = Enum.TextXAlignment.Left
+    ToggleText.ZIndex = 7
+    
+    if description then
+        local DescLabel = Instance.new("TextLabel")
+        DescLabel.Name = "Description"
+        DescLabel.Parent = ToggleFrame
+        DescLabel.BackgroundTransparency = 1
+        DescLabel.Position = UDim2.new(0, 10, 0, 25)
+        DescLabel.Size = UDim2.new(0.7, 0, 0, 15)
+        DescLabel.Font = Enum.Font.Gotham
+        DescLabel.Text = description
+        DescLabel.TextColor3 = currentTheme.TextColor
+        DescLabel.TextSize = 10
+        DescLabel.TextXAlignment = Enum.TextXAlignment.Left
+        DescLabel.ZIndex = 7
+    end
+    
+    ToggleFrame.State = false -- Armazena o estado no ToggleFrame
+    
+    local function UpdateToggle()
+        if ToggleFrame.State then
+            Tween(ToggleButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
+        else
+            Tween(ToggleButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.2)
+        end
+    end
+    
+    UpdateToggle()
+    
+    ToggleButton.MouseButton1Click:Connect(function()
+        ToggleFrame.State = not ToggleFrame.State
+        UpdateToggle()
+        if callback then callback(ToggleFrame.State) end
+    end)
+    
+    ToggleFrame.Parent = SectionContent
+    return ToggleFrame
+end
             
             function SectionFunctions:NewDropdown(name, options, defaultOption, callback)
                 local elementOrder = #SectionContent:GetChildren()
