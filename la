@@ -188,6 +188,7 @@ function SimpleKavo.CreateLib(title, themeName)
     currentTheme = Themes[newThemeName]
     ThemeButton.Text = newThemeName
     
+    -- Atualiza cores principais
     Main.BackgroundColor3 = currentTheme.Background
     Header.BackgroundColor3 = currentTheme.Header
     Title.TextColor3 = currentTheme.TextColor
@@ -195,60 +196,39 @@ function SimpleKavo.CreateLib(title, themeName)
     ThemeButton.TextColor3 = currentTheme.TextColor
     ThemeOptionsFrame.BackgroundColor3 = currentTheme.ElementColor
     TabsScroll.ScrollBarImageColor3 = currentTheme.SchemeColor
-    Minimize.ImageColor3 = currentTheme.TextColor
     
-    -- Atualiza cores dos botões de abas com base na aba ativa
-    for _, tab in ipairs(tabsOrder) do
-        tab.button.TextColor3 = currentTheme.TextColor
-        if tab.content == currentTab then
-            tab.button.BackgroundColor3 = currentTheme.SchemeColor
-        else
-            tab.button.BackgroundColor3 = currentTheme.ElementColor
+    -- Atualiza cores dos botões de abas
+    for _, tab in pairs(TabsHolder:GetChildren()) do
+        if tab:IsA("TextButton") then
+            tab.TextColor3 = currentTheme.TextColor
+            tab.BackgroundColor3 = (tab.BackgroundColor3 == currentTheme.SchemeColor) and currentTheme.SchemeColor or currentTheme.ElementColor
         end
-        -- Atualiza ScrollBar nas contents das abas
-        tab.content.ScrollBarImageColor3 = currentTheme.SchemeColor
     end
     
     -- Função recursiva para atualizar elementos de conteúdo
     local function updateContent(frame)
         for _, child in pairs(frame:GetChildren()) do
-            if child:IsA("TextLabel") or child:IsA("TextButton") or child:IsA("TextBox") then
+            if child:IsA("TextLabel") or child:IsA("TextButton") then
                 child.TextColor3 = currentTheme.TextColor
-                if child:IsA("TextBox") then
-                    child.BackgroundColor3 = currentTheme.ElementColor
-                elseif child.Name == "Button" and child.Parent.Name:match("_Toggle$") then
+                if child.Name == "Button" and child.Parent.Name:match("_Toggle$") then
                     -- Para toggles, verifica o estado antes de atualizar a cor
                     local toggleFrame = child.Parent
-                    local state = toggleFrame.State or false
+                    local state = toggleFrame.State or false -- Assume que o estado é armazenado no frame
                     child.BackgroundColor3 = state and currentTheme.SchemeColor or currentTheme.ElementColor
+                elseif child.Name ~= "Fill" and child.Name ~= "Bar" then
+                    child.BackgroundColor3 = (child.BackgroundColor3 == currentTheme.SchemeColor) and currentTheme.SchemeColor or currentTheme.ElementColor
                 elseif child.Name == "Fill" then
                     child.BackgroundColor3 = currentTheme.SchemeColor
                 elseif child.Name == "Bar" then
                     child.BackgroundColor3 = currentTheme.ElementColor
-                else
-                    child.BackgroundColor3 = currentTheme.ElementColor
                 end
             elseif child:IsA("Frame") and child.Name == "Line" then
                 child.BackgroundColor3 = currentTheme.SchemeColor
-            elseif child:IsA("ScrollingFrame") then
-                child.ScrollBarImageColor3 = currentTheme.SchemeColor
-            elseif child:IsA("ImageButton") or child:IsA("ImageLabel") then
-                if child.Name == "MinimizeButton" then
-                    child.ImageColor3 = currentTheme.TextColor
-                end
             end
             updateContent(child)
         end
     end
     updateContent(Content)
-    
-    -- Atualiza opções do dropdown de temas
-    for _, child in pairs(ThemeOptionsFrame:GetChildren()) do
-        if child:IsA("TextButton") then
-            child.BackgroundColor3 = currentTheme.ElementColor
-            child.TextColor3 = currentTheme.TextColor
-        end
-    end
 end
     
     local function createThemeOptions()
