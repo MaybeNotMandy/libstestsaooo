@@ -14,12 +14,12 @@ local Themes = {
         TextColor = Color3.fromRGB(255, 255, 255),
         ElementColor = Color3.fromRGB(20, 20, 20)
     },
-    LightTheme = {
-        SchemeColor = Color3.fromRGB(150, 150, 150),
-        Background = Color3.fromRGB(255, 255, 255),
-        Header = Color3.fromRGB(200, 200, 200),
-        TextColor = Color3.fromRGB(0, 0, 0),
-        ElementColor = Color3.fromRGB(224, 224, 224)
+    HalloweenTheme = {
+        SchemeColor = Color3.fromRGB(245, 73, 39),
+        Background = Color3.fromRGB(0, 0, 0),
+        Header = Color3.fromRGB(0, 0, 0),
+        TextColor = Color3.fromRGB(255, 255, 255),
+        ElementColor = Color3.fromRGB(245, 73, 39)
     },
     BloodTheme = {
         SchemeColor = Color3.fromRGB(227, 27, 27),
