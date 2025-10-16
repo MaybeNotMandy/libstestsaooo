@@ -188,7 +188,6 @@ function SimpleKavo.CreateLib(title, themeName)
     currentTheme = Themes[newThemeName]
     ThemeButton.Text = newThemeName
     
-    -- Atualiza cores principais
     Main.BackgroundColor3 = currentTheme.Background
     Header.BackgroundColor3 = currentTheme.Header
     Title.TextColor3 = currentTheme.TextColor
@@ -201,8 +200,12 @@ function SimpleKavo.CreateLib(title, themeName)
     -- Atualiza cores dos botões de abas com base na aba ativa
     for _, tab in ipairs(tabsOrder) do
         tab.button.TextColor3 = currentTheme.TextColor
-        tab.button.BackgroundColor3 = (tab.content == currentTab) and currentTheme.SchemeColor or currentTheme.ElementColor
-        -- Atualiza ScrollBarImageColor3 nas contents das abas
+        if tab.content == currentTab then
+            tab.button.BackgroundColor3 = currentTheme.SchemeColor
+        else
+            tab.button.BackgroundColor3 = currentTheme.ElementColor
+        end
+        -- Atualiza ScrollBar nas contents das abas
         tab.content.ScrollBarImageColor3 = currentTheme.SchemeColor
     end
     
