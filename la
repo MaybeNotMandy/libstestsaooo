@@ -302,7 +302,7 @@ function SimpleKavo.CreateLib(title, themeName)
     Minimize.BackgroundTransparency = 0.5
     Minimize.Size = UDim2.new(0, 40, 0, 40)
     Minimize.Position = UDim2.new(0.3, -45, 0.3, -50)
-    Minimize.Image = "rbxassetid://133706910567742"
+    Minimize.Image = "rbxassetid://123824444535731"
     Minimize.ImageColor3 = currentTheme.TextColor
     Minimize.ZIndex = 3
 
