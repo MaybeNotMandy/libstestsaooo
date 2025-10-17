@@ -84,10 +84,6 @@ end
 
 function SimpleKavo.CreateLib(title, themeName)
     local currentTheme = Themes[themeName] or Themes.DefaultTheme
-    local themeNames = {}
-    for name in pairs(Themes) do
-        table.insert(themeNames, name)
-    end
     
     local guiName = "SimpleKavo_Test"
     local ScreenGui = Instance.new("ScreenGui")
@@ -140,174 +136,6 @@ function SimpleKavo.CreateLib(title, themeName)
     Title.TextSize = 16
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.ZIndex = 3
-
-    local ThemeDropdownFrame = Instance.new("Frame")
-    ThemeDropdownFrame.Parent = Main
-    ThemeDropdownFrame.BackgroundTransparency = 1
-    ThemeDropdownFrame.Position = UDim2.new(0.5, 0, 0, 5)
-    ThemeDropdownFrame.Size = UDim2.new(0.35, 0, 0, 30)
-    ThemeDropdownFrame.ZIndex = 100
-    
-    local ThemeButton = Instance.new("TextButton")
-    ThemeButton.Parent = ThemeDropdownFrame
-    ThemeButton.BackgroundColor3 = currentTheme.ElementColor
-    ThemeButton.Size = UDim2.new(1, 0, 0, 20)
-    ThemeButton.Position = UDim2.new(0, 5, 0, 5)
-    ThemeButton.Font = Enum.Font.Gotham
-    ThemeButton.Text = themeName or "DefaultTheme"
-    ThemeButton.TextColor3 = currentTheme.TextColor
-    ThemeButton.TextSize = 12
-    ThemeButton.AutoButtonColor = false
-    ThemeButton.ZIndex = 101
-    
-    local ThemeButtonCorner = Instance.new("UICorner")
-    ThemeButtonCorner.CornerRadius = UDim.new(0, 4)
-    ThemeButtonCorner.Parent = ThemeButton
-    
-    local ThemeOptionsFrame = Instance.new("Frame")
-    ThemeOptionsFrame.Parent = ThemeDropdownFrame
-    ThemeOptionsFrame.BackgroundColor3 = currentTheme.ElementColor
-    ThemeOptionsFrame.Position = UDim2.new(0, 5, 0, 25)
-    ThemeOptionsFrame.Size = UDim2.new(1, -10, 0, 0)
-    ThemeOptionsFrame.Visible = false
-    ThemeOptionsFrame.ClipsDescendants = true
-    ThemeOptionsFrame.ZIndex = 102
-    
-    local ThemeOptionsCorner = Instance.new("UICorner")
-    ThemeOptionsCorner.CornerRadius = UDim.new(0, 4)
-    ThemeOptionsCorner.Parent = ThemeOptionsFrame
-    
-    local ThemeOptionsList = Instance.new("UIListLayout")
-    ThemeOptionsList.Parent = ThemeOptionsFrame
-    ThemeOptionsList.Padding = UDim.new(0, 2)
-    
-    local isThemeOpen = false
-    
-    local function updateTheme(newThemeName)
-        if not Themes[newThemeName] then return end
-        currentTheme = Themes[newThemeName]
-        ThemeButton.Text = newThemeName
-
-        -- Update main UI elements
-        Main.BackgroundColor3 = currentTheme.Background
-        Header.BackgroundColor3 = currentTheme.Header
-        Title.TextColor3 = currentTheme.TextColor
-        ThemeButton.BackgroundColor3 = currentTheme.ElementColor
-        ThemeButton.TextColor3 = currentTheme.TextColor
-        ThemeOptionsFrame.BackgroundColor3 = currentTheme.ElementColor
-        TabsScroll.ScrollBarImageColor3 = currentTheme.SchemeColor
-        Minimize.ImageColor3 = currentTheme.TextColor
-        Minimize.BackgroundColor3 = currentTheme.ElementColor
-        Close.ImageColor3 = currentTheme.TextColor
-
-        -- Update theme dropdown options
-        for _, option in pairs(ThemeOptionsFrame:GetChildren()) do
-            if option:IsA("TextButton") then
-                option.BackgroundColor3 = currentTheme.ElementColor
-                option.TextColor3 = currentTheme.TextColor
-            end
-        end
-
-        -- Update tabs
-        for _, tab in pairs(TabsHolder:GetChildren()) do
-            if tab:IsA("TextButton") then
-                tab.TextColor3 = currentTheme.TextColor
-                tab.BackgroundColor3 = (tab == currentTab and currentTheme.SchemeColor) or currentTheme.ElementColor
-            end
-        end
-
-        -- Recursively update all content elements
-        local function updateContent(frame)
-            for _, child in pairs(frame:GetChildren()) do
-                if child:IsA("TextLabel") then
-                    child.TextColor3 = currentTheme.TextColor
-                elseif child:IsA("TextButton") then
-                    child.TextColor3 = currentTheme.TextColor
-                    if child.Name == "Fill" then
-                        child.BackgroundColor3 = currentTheme.SchemeColor
-                    else
-                        child.BackgroundColor3 = (child.BackgroundColor3 == currentTheme.SchemeColor and child.Name ~= "Button") and currentTheme.SchemeColor or currentTheme.ElementColor
-                    end
-                elseif child:IsA("TextBox") then
-                    child.TextColor3 = currentTheme.TextColor
-                    child.BackgroundColor3 = currentTheme.ElementColor
-                elseif child:IsA("Frame") then
-                    if child.Name == "Line" then
-                        child.BackgroundColor3 = currentTheme.SchemeColor
-                    elseif child.Name == "Bar" then
-                        child.BackgroundColor3 = currentTheme.ElementColor
-                    elseif child.Name == "Fill" then
-                        child.BackgroundColor3 = currentTheme.SchemeColor
-                    end
-                elseif child:IsA("ScrollingFrame") then
-                    child.ScrollBarImageColor3 = currentTheme.SchemeColor
-                end
-                updateContent(child)
-            end
-        end
-
-        -- Update all tabs and their content
-        for _, tab in pairs(tabsOrder) do
-            tab.content.ScrollBarImageColor3 = currentTheme.SchemeColor -- Explicitly update TabContent scrollbar
-            updateContent(tab.content)
-        end
-    end
-    
-    local function createThemeOptions()
-        for _, child in pairs(ThemeOptionsFrame:GetChildren()) do
-            if child:IsA("TextButton") then child:Destroy() end
-        end
-        
-        for _, theme in pairs(themeNames) do
-            local OptionButton = Instance.new("TextButton")
-            OptionButton.Parent = ThemeOptionsFrame
-            OptionButton.BackgroundColor3 = currentTheme.ElementColor
-            OptionButton.Size = UDim2.new(1, 0, 0, 20)
-            OptionButton.Font = Enum.Font.Gotham
-            OptionButton.Text = theme
-            OptionButton.TextColor3 = currentTheme.TextColor
-            OptionButton.TextSize = 12
-            OptionButton.AutoButtonColor = false
-            OptionButton.ZIndex = 103
-            
-            local OptionCorner = Instance.new("UICorner")
-            OptionCorner.CornerRadius = UDim.new(0, 4)
-            OptionCorner.Parent = OptionButton
-            
-            OptionButton.MouseButton1Click:Connect(function()
-                updateTheme(theme)
-                isThemeOpen = false
-                ThemeOptionsFrame.Visible = false
-                Tween(ThemeOptionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.2)
-            end)
-            
-            OptionButton.MouseEnter:Connect(function()
-                Tween(OptionButton, {BackgroundColor3 = Color3.fromRGB(
-                    math.floor(currentTheme.ElementColor.R * 255 + 20),
-                    math.floor(currentTheme.ElementColor.G * 255 + 20),
-                    math.floor(currentTheme.ElementColor.B * 255 + 20)
-                )}, 0.1)
-            end)
-            
-            OptionButton.MouseLeave:Connect(function()
-                Tween(OptionButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.1)
-            end)
-        end
-    end
-    
-    createThemeOptions()
-    
-    ThemeButton.MouseButton1Click:Connect(function()
-        isThemeOpen = not isThemeOpen
-        if isThemeOpen then
-            ThemeOptionsFrame.Visible = true
-            Tween(ThemeOptionsFrame, {Size = UDim2.new(1, 0, 0, #themeNames * 22)}, 0.2)
-        else
-            Tween(ThemeOptionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.2)
-            task.wait(0.2)
-            ThemeOptionsFrame.Visible = false
-        end
-    end)
     
     local Close = Instance.new("ImageButton")
     Close.Parent = Header
@@ -417,6 +245,62 @@ function SimpleKavo.CreateLib(title, themeName)
     
     local tabsOrder = {}
     local currentTab = nil
+    
+    local function updateTheme(newThemeName)
+        if not Themes[newThemeName] then return end
+        currentTheme = Themes[newThemeName]
+
+        -- Update main UI elements
+        Main.BackgroundColor3 = currentTheme.Background
+        Header.BackgroundColor3 = currentTheme.Header
+        Title.TextColor3 = currentTheme.TextColor
+        TabsScroll.ScrollBarImageColor3 = currentTheme.SchemeColor
+        Minimize.ImageColor3 = currentTheme.TextColor
+        Minimize.BackgroundColor3 = currentTheme.ElementColor
+
+        -- Update tabs
+        for _, tab in pairs(TabsHolder:GetChildren()) do
+            if tab:IsA("TextButton") then
+                tab.TextColor3 = currentTheme.TextColor
+                tab.BackgroundColor3 = (tab == currentTab and currentTheme.SchemeColor) or currentTheme.ElementColor
+            end
+        end
+
+        -- Recursively update all content elements
+        local function updateContent(frame)
+            for _, child in pairs(frame:GetChildren()) do
+                if child:IsA("TextLabel") then
+                    child.TextColor3 = currentTheme.TextColor
+                elseif child:IsA("TextButton") then
+                    child.TextColor3 = currentTheme.TextColor
+                    if child.Name ~= "Fill" then
+                        child.BackgroundColor3 = (child.BackgroundColor3 == currentTheme.SchemeColor) and currentTheme.SchemeColor or currentTheme.ElementColor
+                    else
+                        child.BackgroundColor3 = currentTheme.SchemeColor
+                    end
+                elseif child:IsA("TextBox") then
+                    child.TextColor3 = currentTheme.TextColor
+                    child.BackgroundColor3 = currentTheme.ElementColor
+                elseif child:IsA("Frame") then
+                    if child.Name == "Line" then
+                        child.BackgroundColor3 = currentTheme.SchemeColor
+                    elseif child.Name == "Bar" then
+                        child.BackgroundColor3 = currentTheme.ElementColor
+                    elseif child.Name == "Fill" then
+                        child.BackgroundColor3 = currentTheme.SchemeColor
+                    end
+                elseif child:IsA("ScrollingFrame") then
+                    child.ScrollBarImageColor3 = currentTheme.SchemeColor
+                end
+                updateContent(child)
+            end
+        end
+
+        -- Update all content in tabs
+        for _, tab in pairs(tabsOrder) do
+            updateContent(tab.content)
+        end
+    end
     
     function SimpleKavo:AddTab(name)
         local TabButton = Instance.new("TextButton")
@@ -943,7 +827,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 SliderFrame.LayoutOrder = elementOrder
                 SliderFrame.ZIndex = 6
                 
-                local Slider text = Instance.new("TextLabel")
+                local SliderText = Instance.new("TextLabel")
                 SliderText.Name = "Text"
                 SliderText.Parent = SliderFrame
                 SliderText.BackgroundTransparency = 1
