@@ -198,6 +198,7 @@ function SimpleKavo.CreateLib(title, themeName)
         TabsScroll.ScrollBarImageColor3 = currentTheme.SchemeColor
         Minimize.ImageColor3 = currentTheme.TextColor
         Minimize.BackgroundColor3 = currentTheme.ElementColor
+        Close.ImageColor3 = currentTheme.TextColor
 
         -- Update theme dropdown options
         for _, option in pairs(ThemeOptionsFrame:GetChildren()) do
@@ -222,10 +223,10 @@ function SimpleKavo.CreateLib(title, themeName)
                     child.TextColor3 = currentTheme.TextColor
                 elseif child:IsA("TextButton") then
                     child.TextColor3 = currentTheme.TextColor
-                    if child.Name ~= "Fill" then
-                        child.BackgroundColor3 = (child.BackgroundColor3 == currentTheme.SchemeColor) and currentTheme.SchemeColor or currentTheme.ElementColor
-                    else
+                    if child.Name == "Fill" then
                         child.BackgroundColor3 = currentTheme.SchemeColor
+                    else
+                        child.BackgroundColor3 = (child.BackgroundColor3 == currentTheme.SchemeColor and child.Name ~= "Button") and currentTheme.SchemeColor or currentTheme.ElementColor
                     end
                 elseif child:IsA("TextBox") then
                     child.TextColor3 = currentTheme.TextColor
@@ -245,8 +246,9 @@ function SimpleKavo.CreateLib(title, themeName)
             end
         end
 
-        -- Update all content in tabs
+        -- Update all tabs and their content
         for _, tab in pairs(tabsOrder) do
+            tab.content.ScrollBarImageColor3 = currentTheme.SchemeColor -- Explicitly update TabContent scrollbar
             updateContent(tab.content)
         end
     end
@@ -941,7 +943,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 SliderFrame.LayoutOrder = elementOrder
                 SliderFrame.ZIndex = 6
                 
-                local SliderText = Instance.new("TextLabel")
+                local Slider text = Instance.new("TextLabel")
                 SliderText.Name = "Text"
                 SliderText.Parent = SliderFrame
                 SliderText.BackgroundTransparency = 1
