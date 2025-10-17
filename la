@@ -187,7 +187,8 @@ function SimpleKavo.CreateLib(title, themeName)
         if not Themes[newThemeName] then return end
         currentTheme = Themes[newThemeName]
         ThemeButton.Text = newThemeName
-        
+
+        -- Update main UI elements
         Main.BackgroundColor3 = currentTheme.Background
         Header.BackgroundColor3 = currentTheme.Header
         Title.TextColor3 = currentTheme.TextColor
@@ -195,32 +196,59 @@ function SimpleKavo.CreateLib(title, themeName)
         ThemeButton.TextColor3 = currentTheme.TextColor
         ThemeOptionsFrame.BackgroundColor3 = currentTheme.ElementColor
         TabsScroll.ScrollBarImageColor3 = currentTheme.SchemeColor
-        
+        Minimize.ImageColor3 = currentTheme.TextColor
+        Minimize.BackgroundColor3 = currentTheme.ElementColor
+
+        -- Update theme dropdown options
+        for _, option in pairs(ThemeOptionsFrame:GetChildren()) do
+            if option:IsA("TextButton") then
+                option.BackgroundColor3 = currentTheme.ElementColor
+                option.TextColor3 = currentTheme.TextColor
+            end
+        end
+
+        -- Update tabs
         for _, tab in pairs(TabsHolder:GetChildren()) do
             if tab:IsA("TextButton") then
                 tab.TextColor3 = currentTheme.TextColor
-                tab.BackgroundColor3 = (tab.BackgroundColor3 == currentTheme.SchemeColor) and currentTheme.SchemeColor or currentTheme.ElementColor
+                tab.BackgroundColor3 = (tab == currentTab and currentTheme.SchemeColor) or currentTheme.ElementColor
             end
         end
-        
+
+        -- Recursively update all content elements
         local function updateContent(frame)
             for _, child in pairs(frame:GetChildren()) do
-                if child:IsA("TextLabel") or child:IsA("TextButton") then
+                if child:IsA("TextLabel") then
                     child.TextColor3 = currentTheme.TextColor
-                    if child.Name ~= "Fill" and child.Name ~= "Bar" then
+                elseif child:IsA("TextButton") then
+                    child.TextColor3 = currentTheme.TextColor
+                    if child.Name ~= "Fill" then
                         child.BackgroundColor3 = (child.BackgroundColor3 == currentTheme.SchemeColor) and currentTheme.SchemeColor or currentTheme.ElementColor
-                    elseif child.Name == "Fill" then
+                    else
+                        child.BackgroundColor3 = currentTheme.SchemeColor
+                    end
+                elseif child:IsA("TextBox") then
+                    child.TextColor3 = currentTheme.TextColor
+                    child.BackgroundColor3 = currentTheme.ElementColor
+                elseif child:IsA("Frame") then
+                    if child.Name == "Line" then
                         child.BackgroundColor3 = currentTheme.SchemeColor
                     elseif child.Name == "Bar" then
                         child.BackgroundColor3 = currentTheme.ElementColor
+                    elseif child.Name == "Fill" then
+                        child.BackgroundColor3 = currentTheme.SchemeColor
                     end
-                elseif child:IsA("Frame") and child.Name == "Line" then
-                    child.BackgroundColor3 = currentTheme.SchemeColor
+                elseif child:IsA("ScrollingFrame") then
+                    child.ScrollBarImageColor3 = currentTheme.SchemeColor
                 end
                 updateContent(child)
             end
         end
-        updateContent(Content)
+
+        -- Update all content in tabs
+        for _, tab in pairs(tabsOrder) do
+            updateContent(tab.content)
+        end
     end
     
     local function createThemeOptions()
@@ -288,6 +316,7 @@ function SimpleKavo.CreateLib(title, themeName)
     Close.Image = "rbxassetid://3926305904"
     Close.ImageRectOffset = Vector2.new(284, 4)
     Close.ImageRectSize = Vector2.new(24, 24)
+    Close.ImageColor3 = currentTheme.TextColor
     Close.ZIndex = 3
     Close.MouseButton1Click:Connect(function()
         Tween(Main, {Size = UDim2.new(0, 0, 0, 0)})
@@ -298,7 +327,7 @@ function SimpleKavo.CreateLib(title, themeName)
     local Minimize = Instance.new("ImageButton")
     Minimize.Parent = ScreenGui
     Minimize.Name = "MinimizeButton"
-    Minimize.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Minimize.BackgroundColor3 = currentTheme.ElementColor
     Minimize.BackgroundTransparency = 0.5
     Minimize.Size = UDim2.new(0, 40, 0, 40)
     Minimize.Position = UDim2.new(0.3, -45, 0.3, -50)
@@ -435,13 +464,13 @@ function SimpleKavo.CreateLib(title, themeName)
             end
             TabContent.Visible = true
             Tween(TabButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
-            currentTab = TabContent
+            currentTab = TabButton
         end)
         
         if #tabsOrder == 1 then
             TabContent.Visible = true
             Tween(TabButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
-            currentTab = TabContent
+            currentTab = TabButton
         end
         
         local TabFunctions = {}
@@ -820,8 +849,8 @@ function SimpleKavo.CreateLib(title, themeName)
                 
                 return DropdownFrame
             end
-
-function SectionFunctions:NewTextBox(name, placeholder, callback)
+            
+            function SectionFunctions:NewTextBox(name, placeholder, callback)
                 local elementOrder = #SectionContent:GetChildren()
                 
                 local TextBoxFrame = Instance.new("Frame")
@@ -884,18 +913,6 @@ function SectionFunctions:NewTextBox(name, placeholder, callback)
                     end
                 end)
                 
-                local function updateTextBoxTheme()
-                    TextBox.BackgroundColor3 = currentTheme.ElementColor
-                    TextBox.TextColor3 = currentTheme.TextColor
-                    TextBoxLabel.TextColor3 = currentTheme.TextColor
-                end
-                
-                local oldUpdateTheme = updateTheme
-                updateTheme = function(newThemeName)
-                    oldUpdateTheme(newThemeName)
-                    updateTextBoxTheme()
-                end
-                
                 TextBoxFrame.Parent = SectionContent
                 
                 local textBoxMethods = {}
@@ -913,7 +930,6 @@ function SectionFunctions:NewTextBox(name, placeholder, callback)
                 
                 return TextBoxFrame
             end
-
             
             function SectionFunctions:NewSlider(name, min, max, default, callback)
                 local elementOrder = #SectionContent:GetChildren()
