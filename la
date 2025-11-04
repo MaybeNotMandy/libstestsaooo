@@ -776,9 +776,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 SliderFrame.Parent = SectionContent
                 return SliderFrame
             end
-            -- === NEW KEYBIND (NOVO!) ===
-            -- === NEW KEYBIND (CORRIGIDO E GARANTIDO VISÍVEL) ===
-function SectionFunctions:NewKeybind(name, defaultKey, callback)
+            function SectionFunctions:NewKeybind(name, defaultKey, callback)
     local elementOrder = #SectionContent:GetChildren()
     local currentKey = defaultKey or Enum.KeyCode.Unknown
     local listening = false
@@ -789,7 +787,7 @@ function SectionFunctions:NewKeybind(name, defaultKey, callback)
     KeybindFrame.Size = UDim2.new(1, 0, 0, 35)
     KeybindFrame.LayoutOrder = elementOrder
     KeybindFrame.ZIndex = 6
-    KeybindFrame.Parent = SectionContent  -- <<<< AQUI: PARENT ANTES DE TUDO
+    KeybindFrame.Parent = SectionContent  -- <<< PARENT PRIMEIRO
 
     local KeybindLabel = Instance.new("TextLabel")
     KeybindLabel.Name = "Label"
@@ -842,9 +840,8 @@ function SectionFunctions:NewKeybind(name, defaultKey, callback)
 
     KeybindButton.MouseButton1Click:Connect(startListening)
 
-    -- Listener global para ativar ao pressionar a tecla
-    local globalConn
-    globalConn = UserInputService.InputBegan:Connect(function(input)
+    -- Listener global
+    local globalConn = UserInputService.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == currentKey then
             if callback then callback(currentKey) end
         end
@@ -856,7 +853,7 @@ function SectionFunctions:NewKeybind(name, defaultKey, callback)
         if globalConn then globalConn:Disconnect() end
     end)
 
-    -- Hover effects
+    -- Hover
     KeybindButton.MouseEnter:Connect(function()
         if not listening then
             Tween(KeybindButton, {
@@ -875,7 +872,7 @@ function SectionFunctions:NewKeybind(name, defaultKey, callback)
         end
     end)
 
-    -- Métodos públicos
+    -- Métodos
     local keybindMethods = {}
     function keybindMethods:Set(newKey)
         if typeof(newKey) == "EnumItem" and newKey.EnumType == Enum.KeyCode then
@@ -883,18 +880,13 @@ function SectionFunctions:NewKeybind(name, defaultKey, callback)
             KeybindButton.Text = newKey.Name
         end
     end
+    function keybindMethods:Get() return currentKey end
+    for k, v in pairs(keybindMethods) do KeybindFrame[k] = v end
 
-    function keybindMethods:Get()
-        return currentKey
-    end
-
-    for k, v in pairs(keybindMethods) do
-        KeybindFrame[k] = v
-    end
-
-    -- Forçar atualização do layout
-    task.defer(function()
-        SectionList:GetPropertyChangedSignal("AbsoluteContentSize"):Fire()
+    -- FORÇA ATUALIZAÇÃO DO LAYOUT (ESSA É A CHAVE!)
+    task.spawn(function()
+        RunService.Heartbeat:Wait()
+        SectionFrame.Size = UDim2.new(0.9, 0, 0, SectionList.AbsoluteContentSize.Y + 35)
     end)
 
     return KeybindFrame
