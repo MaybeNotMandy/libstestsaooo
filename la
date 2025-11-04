@@ -530,133 +530,137 @@ function SimpleKavo.CreateLib(title, themeName)
                 return ToggleFrame
             end
 
-            function SectionFunctions:NewKeybind(name, defaultKey, callback)
-                local elementOrder = #SectionContent:GetChildren()
-                local currentKey = defaultKey or Enum.KeyCode.Unknown
-                local listening = false
+            luafunction SectionFunctions:NewKeybind(name, defaultKey, callback)
+    local elementOrder = #SectionContent:GetChildren()
+    local currentKey = defaultKey or Enum.KeyCode.Unknown
+    local listening = false
+    local actionName = "Keybind_" .. name .. "_" .. tostring({}) -- Nome único
+    local connection
 
-                local KeybindFrame = Instance.new("Frame")
-                KeybindFrame.Name = name .. "_Keybind"
-                KeybindFrame.BackgroundTransparency = 1
-                KeybindFrame.Size = UDim2.new(1, 0, 0, 35)
-                KeybindFrame.LayoutOrder = elementOrder
-                KeybindFrame.ZIndex = 6
+    local ContextActionService = game:GetService("ContextActionService")
 
-                local KeybindLabel = Instance.new("TextLabel")
-                KeybindLabel.Name = "Label"
-                KeybindLabel.Parent = KeybindFrame
-                KeybindLabel.BackgroundTransparency = 1
-                KeybindLabel.Position = UDim2.new(0, 0, 0, 0)
-                KeybindLabel.Size = UDim2.new(0.6, 0, 1, 0)
-                KeybindLabel.Font = Enum.Font.Gotham
-                KeybindLabel.Text = name
-                KeybindLabel.TextColor3 = currentTheme.TextColor
-                KeybindLabel.TextSize = 14
-                KeybindLabel.TextXAlignment = Enum.TextXAlignment.Left
-                KeybindLabel.ZIndex = 7
+    local KeybindFrame = Instance.new("Frame")
+    KeybindFrame.Name = name .. "_Keybind"
+    KeybindFrame.BackgroundTransparency = 1
+    KeybindFrame.Size = UDim2.new(1, 0, 0, 35)
+    KeybindFrame.LayoutOrder = elementOrder
+    KeybindFrame.ZIndex = 6
 
-                local KeybindButton = Instance.new("TextButton")
-                KeybindButton.Name = "KeybindButton"
-                KeybindButton.Parent = KeybindFrame
-                KeybindButton.BackgroundColor3 = currentTheme.ElementColor
-                KeybindButton.Position = UDim2.new(1, -100, 0, 3)
-                KeybindButton.Size = UDim2.new(0, 90, 0, 28)
-                KeybindButton.Font = Enum.Font.Gotham
-                KeybindButton.Text = currentKey ~= Enum.KeyCode.Unknown and currentKey.Name or "..."
-                KeybindButton.TextColor3 = currentTheme.TextColor
-                KeybindButton.TextSize = 13
-                KeybindButton.AutoButtonColor = false
-                KeybindButton.ZIndex = 7
+    local KeybindLabel = Instance.new("TextLabel")
+    KeybindLabel.Name = "Label"
+    KeybindLabel.Parent = KeybindFrame
+    KeybindLabel.BackgroundTransparency = 1
+    KeybindLabel.Position = UDim2.new(0, 10, 0, 0)
+    KeybindLabel.Size = UDim2.new(0.6, 0, 1, 0)
+    KeybindLabel.Font = Enum.Font.Gotham
+    KeybindLabel.Text = name
+    KeybindLabel.TextColor3 = currentTheme.TextColor
+    KeybindLabel.TextSize = 14
+    KeybindLabel.TextXAlignment = Enum.TextXAlignment.Left
+    KeybindLabel.ZIndex = 7
 
-                local ButtonCorner = Instance.new("UICorner")
-                ButtonCorner.CornerRadius = UDim.new(0, 4)
-                ButtonCorner.Parent = KeybindButton
+    local KeybindButton = Instance.new("TextButton")
+    KeybindButton.Name = "KeybindButton"
+    KeybindButton.Parent = KeybindFrame
+    KeybindButton.BackgroundColor3 = currentTheme.ElementColor
+    KeybindButton.Position = UDim2.new(1, -100, 0, 3)
+    KeybindButton.Size = UDim2.new(0, 90, 0, 28)
+    KeybindButton.Font = Enum.Font.Gotham
+    KeybindButton.Text = currentKey ~= Enum.KeyCode.Unknown and currentKey.Name or "..."
+    KeybindButton.TextColor3 = currentTheme.TextColor
+    KeybindButton.TextSize = 13
+    KeybindButton.AutoButtonColor = false
+    KeybindButton.ZIndex = 7
 
-                -- Hover
-                KeybindButton.MouseEnter:Connect(function()
-                    if not listening then
-                        Tween(KeybindButton, {
-                            BackgroundColor3 = Color3.fromRGB(
-                                math.floor(currentTheme.ElementColor.R * 255 + 20),
-                                math.floor(currentTheme.ElementColor.G * 255 + 20),
-                                math.floor(currentTheme.ElementColor.B * 255 + 20)
-                            )
-                        }, 0.1)
-                    end
-                end)
+    local ButtonCorner = Instance.new("UICorner")
+    ButtonCorner.CornerRadius = UDim.new(0, 4)
+    ButtonCorner.Parent = KeybindButton
 
-                KeybindButton.MouseLeave:Connect(function()
-                    if not listening then
-                        Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.1)
-                    end
-                end)
+    -- Hover
+    KeybindButton.MouseEnter:Connect(function()
+        if not listening then
+            Tween(KeybindButton, {
+                BackgroundColor3 = Color3.fromRGB(
+                    math.floor(currentTheme.ElementColor.R * 255 + 20),
+                    math.floor(currentTheme.ElementColor.G * 255 + 20),
+                    math.floor(currentTheme.ElementColor.B * 255 + 20)
+                )
+            }, 0.1)
+        end
+    end)
 
-                -- Mudar keybind
-                local connection
-                KeybindButton.MouseButton1Click:Connect(function()
-                    listening = true
-                    KeybindButton.Text = "..."
-                    Tween(KeybindButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
+    KeybindButton.MouseLeave:Connect(function()
+        if not listening then
+            Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.1)
+        end
+    end)
 
-                    connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-                        if gameProcessed then return end
+    -- Atualiza o bind
+    local function updateBind()
+        if connection then
+            ContextActionService:UnbindAction(actionName)
+        end
+        if currentKey == Enum.KeyCode.Unknown then return end
 
-                        local key = input.KeyCode
-                        if key == Enum.KeyCode.Unknown then
-                            key = input.UserInputType
-                        end
-
-                        if key ~= Enum.KeyCode.Unknown then
-                            currentKey = key
-                            KeybindButton.Text = key.Name
-                            listening = false
-                            Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.2)
-                            connection:Disconnect()
-                        end
-                    end)
-                end)
-
-                -- Detectar pressionar
-                local keybindConnection
-                keybindConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-                    if gameProcessed or listening then return end
-
-                    local key = input.KeyCode
-                    if key == Enum.KeyCode.Unknown then
-                        key = input.UserInputType
-                    end
-
-                    if key == currentKey then
-                        if callback then
-                            task.spawn(callback)
-                        end
-                    end
-                end)
-
-                KeybindFrame.Destroying:Connect(function()
-                    if connection then connection:Disconnect() end
-                    if keybindConnection then keybindConnection:Disconnect() end
-                end)
-
-                KeybindFrame.Parent = SectionContent
-
-                local keybindMethods = {}
-                function keybindMethods:Set(newKey)
-                    if typeof(newKey) == "EnumItem" and (newKey.EnumType == Enum.KeyCode or newKey.EnumType == Enum.UserInputType) then
-                        currentKey = newKey
-                        KeybindButton.Text = newKey.Name
-                    end
+        ContextActionService:BindAction(
+            actionName,
+            function(_, state)
+                if state == Enum.UserInputState.Begin and not listening then
+                    task.spawn(callback)
                 end
-                function keybindMethods:Get()
-                    return currentKey
-                end
+                return Enum.ContextActionResult.Sink
+            end,
+            false,
+            currentKey
+        )
+    end
 
-                for name, func in pairs(keybindMethods) do
-                    KeybindFrame[name] = func
-                end
+    -- Clique para mudar tecla
+    KeybindButton.MouseButton1Click:Connect(function()
+        listening = true
+        KeybindButton.Text = "..."
+        Tween(KeybindButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
 
-                return KeybindFrame
+        local temp
+        temp = UserInputService.InputBegan:Connect(function(input, gp)
+            if gp then return end
+            local key = input.KeyCode ~= Enum.KeyCode.Unknown and input.KeyCode or input.UserInputType
+            if key ~= Enum.KeyCode.Unknown then
+                currentKey = key
+                KeybindButton.Text = key.Name
+                listening = false
+                Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.2)
+                temp:Disconnect()
+                updateBind()
             end
+        end)
+    end)
+
+    -- Inicializa
+    updateBind()
+
+    -- Limpeza
+    KeybindFrame.Destroying:Connect(function()
+        ContextActionService:UnbindAction(actionName)
+    end)
+
+    KeybindFrame.Parent = SectionContent
+
+    -- Métodos
+    local methods = {}
+    function methods:Set(key) 
+        if typeof(key) == "EnumItem" and (key.EnumType == Enum.KeyCode or key.EnumType == Enum.UserInputType) then
+            currentKey = key
+            KeybindButton.Text = key.Name
+            updateBind()
+        end
+    end
+    function methods:Get() return currentKey end
+
+    for k, v in pairs(methods) do KeybindFrame[k] = v end
+
+    return KeybindFrame  -- RETORNA O FRAME!
+end
           
             function SectionFunctions:NewDropdown(name, options, defaultOption, callback)
                 local elementOrder = #SectionContent:GetChildren()
