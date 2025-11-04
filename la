@@ -549,6 +549,133 @@ function SimpleKavo.CreateLib(title, themeName)
                 ToggleFrame.Parent = SectionContent
                 return ToggleFrame
             end
+
+function SectionFunctions:NewKeybind(name, defaultKey, callback)
+    local elementOrder = #SectionContent:GetChildren()
+    local currentKey = defaultKey or Enum.KeyCode.Unknown
+    local listening = false
+
+    local KeybindFrame = Instance.new("Frame")
+    KeybindFrame.Name = name .. "_Keybind"
+    KeybindFrame.BackgroundTransparency = 1
+    KeybindFrame.Size = UDim2.new(1, 0, 0, 35)
+    KeybindFrame.LayoutOrder = elementOrder
+    KeybindFrame.ZIndex = 6
+
+    local KeybindLabel = Instance.new("TextLabel")
+    KeybindLabel.Name = "Label"
+    KeybindLabel.Parent = KeybindFrame
+    KeybindLabel.BackgroundTransparency = 1
+    KeybindLabel.Position = UDim2.new(0, 0, 0, 0)
+    KeybindLabel.Size = UDim2.new(0.6, 0, 1, 0)
+    KeybindLabel.Font = Enum.Font.Gotham
+    KeybindLabel.Text = name
+    KeybindLabel.TextColor3 = currentTheme.TextColor
+    KeybindLabel.TextSize = 14
+    KeybindLabel.TextXAlignment = Enum.TextXAlignment.Left
+    KeybindLabel.ZIndex = 7
+
+    local KeybindButton = Instance.new("TextButton")
+    KeybindButton.Name = "KeybindButton"
+    KeybindButton.Parent = KeybindFrame
+    KeybindButton.BackgroundColor3 = currentTheme.ElementColor
+    KeybindButton.Position = UDim2.new(1, -100, 0, 2.5)
+    KeybindButton.Size = UDim2.new(0, 90, 0, 30)
+    KeybindButton.Font = Enum.Font.Gotham
+    KeybindButton.Text = currentKey.Name ~= "Unknown" and currentKey.Name or "..."
+    KeybindButton.TextColor3 = currentTheme.TextColor
+    KeybindButton.TextSize = 14
+    KeybindButton.AutoButtonColor = false
+    KeybindButton.ZIndex = 7
+
+    local ButtonCorner = Instance.new("UICorner")
+    ButtonCorner.CornerRadius = UDim.new(0, 4)
+    ButtonCorner.Parent = KeybindButton
+
+    -- Efeito hover
+    KeybindButton.MouseEnter:Connect(function()
+        if not listening then
+            Tween(KeybindButton, {
+                BackgroundColor3 = Color3.fromRGB(
+                    math.floor(currentTheme.ElementColor.R * 255 + 20),
+                    math.floor(currentTheme.ElementColor.G * 255 + 20),
+                    math.floor(currentTheme.ElementColor.B * 255 + 20)
+                )
+            }, 0.1)
+        end
+    end)
+
+    KeybindButton.MouseLeave:Connect(function()
+        if not listening then
+            Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.1)
+        end
+    end)
+
+    -- Iniciar escuta de nova tecla
+    KeybindButton.MouseButton1Click:Connect(function()
+        listening = true
+        KeybindButton.Text = "..."
+        Tween(KeybindButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
+    end)
+
+    -- Captura da tecla
+    local connection
+    connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if listening and not gameProcessed then
+            if input.UserInputType == Enum.UserInputType.Keyboard then
+                currentKey = input.KeyCode
+            elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+                currentKey = Enum.KeyCode.Mouse1
+            elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+                currentKey = Enum.KeyCode.Mouse2
+            else
+                currentKey = Enum.KeyCode.Unknown
+            end
+
+            KeybindButton.Text = currentKey.Name ~= "Unknown" and currentKey.Name or "[None]"
+            Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.2)
+            listening = false
+            connection:Disconnect()
+
+            if callback then callback(currentKey) end
+        end
+    end)
+
+    -- Disparar callback ao pressionar a tecla
+    local triggerConnection
+    triggerConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if not gameProcessed and input.KeyCode == currentKey then
+            if callback then callback(currentKey) end
+        end
+    end)
+
+    -- Limpar conexão ao destruir
+    KeybindFrame.AncestryChanged:Connect(function(_, parent)
+        if not parent then
+            if connection then connection:Disconnect() end
+            if triggerConnection then triggerConnection:Disconnect() end
+        end
+    end)
+
+    KeybindFrame.Parent = SectionContent
+
+    -- Métodos públicos
+    local keybindMethods = {}
+    function keybindMethods:Set(newKey)
+        currentKey = newKey or Enum.KeyCode.Unknown
+        KeybindButton.Text = currentKey.Name ~= "Unknown" and currentKey.Name or "[None]"
+        if callback then callback(currentKey) end
+    end
+    function keybindMethods:Get()
+        return currentKey
+    end
+
+    for name, func in pairs(keybindMethods) do
+        KeybindFrame[name] = func
+    end
+
+    return KeybindFrame
+end
             
             function SectionFunctions:NewDropdown(name, options, defaultOption, callback)
                 local elementOrder = #SectionContent:GetChildren()
