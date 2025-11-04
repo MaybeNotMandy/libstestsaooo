@@ -880,9 +880,9 @@ function SimpleKavo.CreateLib(title, themeName)
 
                 SliderFrame.Parent = SectionContent
                 return SliderFrame
-            end
+            end  -- <<< ESTE end FECHA O NewSlider
 
-            -- KEYBIND DENTRO DO ESCOPO!
+            -- <<< AQUI COMEÇA O NewKeybind (FORA do Slider!)
             function SectionFunctions:NewKeybind(name, defaultKey, callback)
                 local elementOrder = #SectionContent:GetChildren()
                 local currentKey = defaultKey or Enum.KeyCode.Unknown
@@ -990,10 +990,10 @@ function SimpleKavo.CreateLib(title, themeName)
                 for k, v in pairs(methods) do KeybindFrame[k] = v end
 
                 return KeybindFrame
-            end
+            end  -- <<< ESTE end FECHA O NewKeybind
 
             return SectionFunctions
-        end
+        end  -- <<< ESTE end FECHA O NewSection
 
         return TabFunctions
     end
