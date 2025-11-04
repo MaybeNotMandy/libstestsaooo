@@ -1,10 +1,8 @@
 local SimpleKavo = {}
-
 -- Serviços
 local TweenService = game:GetService("TweenService") or error("TweenService not available")
 local UserInputService = game:GetService("UserInputService") or error("UserInputService not available")
 local RunService = game:GetService("RunService") or error("RunService not available")
-
 -- Temas pré-definidos
 local Themes = {
     DarkTheme = {
@@ -36,43 +34,37 @@ local Themes = {
         ElementColor = Color3.fromRGB(32, 32, 38)
     }
 }
-
 local function Tween(object, properties, duration)
     local tweenInfo = TweenInfo.new(duration or 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local tween = TweenService:Create(object, tweenInfo, properties)
     tween:Play()
     return tween
 end
-
 function SimpleKavo:DraggingEnabled(frame, parent)
     parent = parent or frame
     local dragging = false
     local dragInput, mousePos, framePos
-
     local function startDrag(input)
         dragging = true
         mousePos = input.Position
         framePos = parent.Position
-
+      
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
             end
         end)
     end
-
     frame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             startDrag(input)
         end
     end)
-
     frame.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             dragInput = input
         end
     end)
-
     UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging and
            (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
@@ -81,26 +73,24 @@ function SimpleKavo:DraggingEnabled(frame, parent)
         end
     end)
 end
-
 function SimpleKavo.CreateLib(title, themeName)
     local currentTheme = Themes[themeName] or Themes.DefaultTheme
-
+  
     local guiName = "SimpleKavo_Test"
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = guiName
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.DisplayOrder = 1000
-
     local success, err = pcall(function()
         ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
     end)
-
+  
     if not success then
         warn("Failed to parent ScreenGui to PlayerGui: " .. tostring(err))
         return
     end
-
+  
     local Main = Instance.new("Frame")
     Main.Name = "Main"
     Main.Parent = ScreenGui
@@ -109,22 +99,22 @@ function SimpleKavo.CreateLib(title, themeName)
     Main.Size = UDim2.new(0, 500, 0, 350)
     Main.ClipsDescendants = true
     Main.ZIndex = 1
-
+  
     local MainCorner = Instance.new("UICorner")
     MainCorner.CornerRadius = UDim.new(0, 6)
     MainCorner.Parent = Main
-
+  
     local Header = Instance.new("Frame")
     Header.Name = "Header"
     Header.Parent = Main
     Header.BackgroundColor3 = currentTheme.Header
     Header.Size = UDim2.new(1, 0, 0, 30)
     Header.ZIndex = 2
-
+  
     local HeaderCorner = Instance.new("UICorner")
     HeaderCorner.CornerRadius = UDim.new(0, 6)
     HeaderCorner.Parent = Header
-
+  
     local Title = Instance.new("TextLabel")
     Title.Parent = Header
     Title.BackgroundTransparency = 1
@@ -136,7 +126,7 @@ function SimpleKavo.CreateLib(title, themeName)
     Title.TextSize = 16
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.ZIndex = 3
-
+  
     local Close = Instance.new("ImageButton")
     Close.Parent = Header
     Close.BackgroundTransparency = 1
@@ -153,7 +143,7 @@ function SimpleKavo.CreateLib(title, themeName)
         task.wait(0.3)
         ScreenGui:Destroy()
     end)
-
+  
     local Minimize = Instance.new("ImageButton")
     Minimize.Parent = ScreenGui
     Minimize.Name = "MinimizeButton"
@@ -164,20 +154,16 @@ function SimpleKavo.CreateLib(title, themeName)
     Minimize.Image = "rbxassetid://111404669605877"
     Minimize.ImageColor3 = currentTheme.TextColor
     Minimize.ZIndex = 3
-
     local MinimizeStroke = Instance.new("UIStroke")
     MinimizeStroke.Color = Color3.fromRGB(0, 0, 0)
     MinimizeStroke.Parent = Minimize
     MinimizeStroke.Thickness = 1.5
     MinimizeStroke.Transparency = 0
     MinimizeStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
     local MinimizeCorner = Instance.new("UICorner")
     MinimizeCorner.CornerRadius = UDim.new(0, 8)
     MinimizeCorner.Parent = Minimize
-
     SimpleKavo:DraggingEnabled(Minimize)
-
     local Minimized = false
     Minimize.MouseButton1Click:Connect(function()
         Minimized = not Minimized
@@ -187,9 +173,9 @@ function SimpleKavo.CreateLib(title, themeName)
             Tween(Main, {Size = UDim2.new(0, 500, 0, 350)})
         end
     end)
-
+  
     SimpleKavo:DraggingEnabled(Header, Main)
-
+  
     local TabsScroll = Instance.new("ScrollingFrame")
     TabsScroll.Name = "TabsScroll"
     TabsScroll.Parent = Main
@@ -203,7 +189,6 @@ function SimpleKavo.CreateLib(title, themeName)
     TabsScroll.ScrollingDirection = Enum.ScrollingDirection.Y
     TabsScroll.VerticalScrollBarInset = Enum.ScrollBarInset.Always
     TabsScroll.ZIndex = 2
-
     local TabsHolder = Instance.new("Frame")
     TabsHolder.Name = "TabsHolder"
     TabsHolder.Parent = TabsScroll
@@ -211,12 +196,10 @@ function SimpleKavo.CreateLib(title, themeName)
     TabsHolder.Size = UDim2.new(1, 0, 0, 0)
     TabsHolder.AutomaticSize = Enum.AutomaticSize.Y
     TabsHolder.ZIndex = 2
-
     local TabsList = Instance.new("UIListLayout")
     TabsList.Parent = TabsHolder
     TabsList.Padding = UDim.new(0, 5)
     TabsList.SortOrder = Enum.SortOrder.LayoutOrder
-
     TabsList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         TabsHolder.Size = UDim2.new(1, 0, 0, TabsList.AbsoluteContentSize.Y)
         if #TabsHolder:GetChildren() > 5 then
@@ -225,7 +208,7 @@ function SimpleKavo.CreateLib(title, themeName)
             TabsScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
         end
     end)
-
+  
     local Content = Instance.new("Frame")
     Content.Name = "Content"
     Content.Parent = Main
@@ -233,7 +216,7 @@ function SimpleKavo.CreateLib(title, themeName)
     Content.Position = UDim2.new(0, 150, 0, 30)
     Content.Size = UDim2.new(1, -150, 1, -30)
     Content.ZIndex = 2
-
+  
     local function updateContentZIndex(frame, zIndex)
         for _, child in pairs(frame:GetChildren()) do
             if child:IsA("Frame") or child:IsA("TextButton") or child:IsA("TextLabel") or child:IsA("ScrollingFrame") then
@@ -243,27 +226,28 @@ function SimpleKavo.CreateLib(title, themeName)
         end
     end
     updateContentZIndex(Content, 3)
-
+  
     local tabsOrder = {}
     local currentTab = nil
-
+  
     local function updateTheme(newThemeName)
         if not Themes[newThemeName] then return end
         currentTheme = Themes[newThemeName]
+        -- Update main UI elements
         Main.BackgroundColor3 = currentTheme.Background
         Header.BackgroundColor3 = currentTheme.Header
         Title.TextColor3 = currentTheme.TextColor
         TabsScroll.ScrollBarImageColor3 = currentTheme.SchemeColor
         Minimize.ImageColor3 = currentTheme.TextColor
         Minimize.BackgroundColor3 = currentTheme.ElementColor
-
+        -- Update tabs
         for _, tab in pairs(TabsHolder:GetChildren()) do
             if tab:IsA("TextButton") then
                 tab.TextColor3 = currentTheme.TextColor
                 tab.BackgroundColor3 = (tab == currentTab and currentTheme.SchemeColor) or currentTheme.ElementColor
             end
         end
-
+        -- Recursively update all content elements
         local function updateContent(frame)
             for _, child in pairs(frame:GetChildren()) do
                 if child:IsA("TextLabel") then
@@ -292,12 +276,12 @@ function SimpleKavo.CreateLib(title, themeName)
                 updateContent(child)
             end
         end
-
+        -- Update all content in tabs
         for _, tab in pairs(tabsOrder) do
             updateContent(tab.content)
         end
     end
-
+  
     function SimpleKavo:AddTab(name)
         local TabButton = Instance.new("TextButton")
         TabButton.Name = name
@@ -312,11 +296,11 @@ function SimpleKavo.CreateLib(title, themeName)
         TabButton.Position = UDim2.new(0.35, -10, 0, 0)
         TabButton.LayoutOrder = #tabsOrder + 1
         TabButton.ZIndex = 3
-
+      
         local TabCorner = Instance.new("UICorner")
         TabCorner.CornerRadius = UDim.new(0, 4)
         TabCorner.Parent = TabButton
-
+      
         local TabContent = Instance.new("ScrollingFrame")
         TabContent.Name = name.."_Content"
         TabContent.Parent = Content
@@ -328,17 +312,17 @@ function SimpleKavo.CreateLib(title, themeName)
         TabContent.CanvasSize = UDim2.new(0, 0, 0, 0)
         TabContent.AutomaticCanvasSize = Enum.AutomaticSize.Y
         TabContent.ZIndex = 3
-
+      
         local TabContentList = Instance.new("UIListLayout")
         TabContentList.Parent = TabContent
         TabContentList.Padding = UDim.new(0, 10)
         TabContentList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
+      
         table.insert(tabsOrder, {
             button = TabButton,
             content = TabContent
         })
-
+      
         TabButton.MouseButton1Click:Connect(function()
             for _, tab in ipairs(tabsOrder) do
                 tab.content.Visible = false
@@ -348,15 +332,15 @@ function SimpleKavo.CreateLib(title, themeName)
             Tween(TabButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
             currentTab = TabButton
         end)
-
+      
         if #tabsOrder == 1 then
             TabContent.Visible = true
             Tween(TabButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
             currentTab = TabButton
         end
-
+      
         local TabFunctions = {}
-
+      
         function TabFunctions:NewSection(name)
             local SectionFrame = Instance.new("Frame")
             SectionFrame.Name = name.."_Section"
@@ -365,14 +349,14 @@ function SimpleKavo.CreateLib(title, themeName)
             SectionFrame.Size = UDim2.new(0.9, 0, 0, 0)
             SectionFrame.AutomaticSize = Enum.AutomaticSize.Y
             SectionFrame.ZIndex = 4
-
+          
             local SectionHeader = Instance.new("Frame")
             SectionHeader.Name = "Header"
             SectionHeader.Parent = SectionFrame
             SectionHeader.BackgroundTransparency = 1
             SectionHeader.Size = UDim2.new(1, 0, 0, 30)
             SectionHeader.ZIndex = 5
-
+          
             local SectionLabel = Instance.new("TextLabel")
             SectionLabel.Name = "Label"
             SectionLabel.Parent = SectionHeader
@@ -384,7 +368,7 @@ function SimpleKavo.CreateLib(title, themeName)
             SectionLabel.TextSize = 14
             SectionLabel.TextXAlignment = Enum.TextXAlignment.Left
             SectionLabel.ZIndex = 6
-
+          
             local SectionLine = Instance.new("Frame")
             SectionLine.Name = "Line"
             SectionLine.Parent = SectionHeader
@@ -393,7 +377,7 @@ function SimpleKavo.CreateLib(title, themeName)
             SectionLine.Position = UDim2.new(0, 0, 1, -2)
             SectionLine.Size = UDim2.new(1, 0, 0, 1)
             SectionLine.ZIndex = 6
-
+          
             local SectionContent = Instance.new("Frame")
             SectionContent.Name = "Content"
             SectionContent.Parent = SectionFrame
@@ -402,7 +386,7 @@ function SimpleKavo.CreateLib(title, themeName)
             SectionContent.Size = UDim2.new(1, 0, 0, 0)
             SectionContent.AutomaticSize = Enum.AutomaticSize.Y
             SectionContent.ZIndex = 5
-
+          
             local SectionList = Instance.new("UIListLayout")
             SectionList.Parent = SectionContent
             SectionList.Padding = UDim.new(0, 5)
@@ -410,11 +394,12 @@ function SimpleKavo.CreateLib(title, themeName)
             SectionList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
                 SectionFrame.Size = UDim2.new(0.9, 0, 0, SectionList.AbsoluteContentSize.Y + 35)
             end)
-
+          
             local SectionFunctions = {}
-
+          
             function SectionFunctions:NewButton(name, description, callback)
                 local elementOrder = #SectionContent:GetChildren()
+              
                 local Button = Instance.new("TextButton")
                 Button.Name = name
                 Button.BackgroundColor3 = currentTheme.ElementColor
@@ -426,7 +411,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 Button.AutoButtonColor = false
                 Button.LayoutOrder = elementOrder
                 Button.ZIndex = 6
-
+              
                 if description then
                     local DescLabel = Instance.new("TextLabel")
                     DescLabel.Name = "Description"
@@ -441,40 +426,43 @@ function SimpleKavo.CreateLib(title, themeName)
                     DescLabel.TextXAlignment = Enum.TextXAlignment.Left
                     DescLabel.ZIndex = 7
                 end
-
+              
                 local ButtonCorner = Instance.new("UICorner")
                 ButtonCorner.CornerRadius = UDim.new(0, 4)
                 ButtonCorner.Parent = Button
-
+              
                 Button.MouseEnter:Connect(function()
-                    Tween(Button, {BackgroundColor3 = Color3.fromRGB(
-                        math.floor(currentTheme.ElementColor.R * 255 + 20),
-                        math.floor(currentTheme.ElementColor.G * 255 + 20),
-                        math.floor(currentTheme.ElementColor.B * 255 + 20)
-                    )}, 0.1)
+                    Tween(Button, {
+                        BackgroundColor3 = Color3.fromRGB(
+                            math.floor(currentTheme.ElementColor.R * 255 + 20),
+                            math.floor(currentTheme.ElementColor.G * 255 + 20),
+                            math.floor(currentTheme.ElementColor.B * 255 + 20)
+                        )
+                    }, 0.1)
                 end)
-
+              
                 Button.MouseLeave:Connect(function()
                     Tween(Button, {BackgroundColor3 = currentTheme.ElementColor}, 0.1)
                 end)
-
+              
                 Button.MouseButton1Click:Connect(function()
                     if callback then callback() end
                 end)
-
+              
                 Button.Parent = SectionContent
                 return Button
             end
-
+          
             function SectionFunctions:NewToggle(name, description, callback)
                 local elementOrder = #SectionContent:GetChildren()
+              
                 local ToggleFrame = Instance.new("Frame")
                 ToggleFrame.Name = name .. "_Toggle"
                 ToggleFrame.BackgroundTransparency = 1
                 ToggleFrame.Size = UDim2.new(1, 0, 0, description and 50 or 35)
                 ToggleFrame.LayoutOrder = elementOrder
                 ToggleFrame.ZIndex = 6
-
+              
                 local ToggleButton = Instance.new("TextButton")
                 ToggleButton.Name = "Button"
                 ToggleButton.Parent = ToggleFrame
@@ -487,11 +475,11 @@ function SimpleKavo.CreateLib(title, themeName)
                 ToggleButton.TextSize = 14
                 ToggleButton.AutoButtonColor = false
                 ToggleButton.ZIndex = 7
-
+              
                 local ToggleCorner = Instance.new("UICorner")
                 ToggleCorner.CornerRadius = UDim.new(0, 4)
                 ToggleCorner.Parent = ToggleButton
-
+              
                 local ToggleText = Instance.new("TextLabel")
                 ToggleText.Name = "Text"
                 ToggleText.Parent = ToggleFrame
@@ -504,7 +492,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 ToggleText.TextSize = 14
                 ToggleText.TextXAlignment = Enum.TextXAlignment.Left
                 ToggleText.ZIndex = 7
-
+              
                 if description then
                     local DescLabel = Instance.new("TextLabel")
                     DescLabel.Name = "Description"
@@ -519,9 +507,9 @@ function SimpleKavo.CreateLib(title, themeName)
                     DescLabel.TextXAlignment = Enum.TextXAlignment.Left
                     DescLabel.ZIndex = 7
                 end
-
+              
                 local State = false
-
+              
                 local function UpdateToggle()
                     if State then
                         Tween(ToggleButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
@@ -529,24 +517,24 @@ function SimpleKavo.CreateLib(title, themeName)
                         Tween(ToggleButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.2)
                     end
                 end
-
+              
                 UpdateToggle()
-
+              
                 ToggleButton.MouseButton1Click:Connect(function()
                     State = not State
                     UpdateToggle()
                     if callback then callback(State) end
                 end)
-
+              
                 ToggleFrame.Parent = SectionContent
                 return ToggleFrame
             end
-
+          
             function SectionFunctions:NewDropdown(name, options, defaultOption, callback)
                 local elementOrder = #SectionContent:GetChildren()
                 local isOpen = false
                 local selectedOption = defaultOption or (options and options[1]) or "Selecione"
-
+              
                 local DropdownFrame = Instance.new("Frame")
                 DropdownFrame.Name = name.."_Dropdown"
                 DropdownFrame.BackgroundTransparency = 1
@@ -554,7 +542,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 DropdownFrame.ClipsDescendants = true
                 DropdownFrame.LayoutOrder = elementOrder
                 DropdownFrame.ZIndex = 6
-
+              
                 local MainButton = Instance.new("TextButton")
                 MainButton.Name = "MainButton"
                 MainButton.Parent = DropdownFrame
@@ -567,23 +555,23 @@ function SimpleKavo.CreateLib(title, themeName)
                 MainButton.TextXAlignment = Enum.TextXAlignment.Left
                 MainButton.AutoButtonColor = false
                 MainButton.ZIndex = 7
-
+              
                 local ButtonCorner = Instance.new("UICorner")
                 ButtonCorner.CornerRadius = UDim.new(0, 4)
                 ButtonCorner.Parent = MainButton
-
+              
                 local Arrow = Instance.new("TextLabel")
                 Arrow.Name = "Arrow"
                 Arrow.Parent = MainButton
                 Arrow.BackgroundTransparency = 1
                 Arrow.Size = UDim2.new(0, 20, 0, 20)
                 Arrow.Position = UDim2.new(1, -25, 0, 7)
-                Arrow.Text = "Down Arrow"
+                Arrow.Text = "▼"
                 Arrow.TextColor3 = currentTheme.TextColor
                 Arrow.Font = Enum.Font.Gotham
                 Arrow.TextSize = 14
                 Arrow.ZIndex = 7
-
+              
                 local OptionsFrame = Instance.new("Frame")
                 OptionsFrame.Name = "OptionsFrame"
                 OptionsFrame.Parent = DropdownFrame
@@ -593,21 +581,21 @@ function SimpleKavo.CreateLib(title, themeName)
                 OptionsFrame.Visible = false
                 OptionsFrame.ClipsDescendants = true
                 OptionsFrame.ZIndex = 8
-
+              
                 local OptionsCorner = Instance.new("UICorner")
                 OptionsCorner.CornerRadius = UDim.new(0, 4)
                 OptionsCorner.Parent = OptionsFrame
-
+              
                 local OptionsList = Instance.new("UIListLayout")
                 OptionsList.Parent = OptionsFrame
                 OptionsList.Padding = UDim.new(0, 5)
                 OptionsList.HorizontalAlignment = Enum.HorizontalAlignment.Left
-
+              
                 local function createOptions()
                     for _, child in ipairs(OptionsFrame:GetChildren()) do
                         if child:IsA("TextButton") then child:Destroy() end
                     end
-
+                  
                     if not options or #options == 0 then
                         local NoOptions = Instance.new("TextLabel")
                         NoOptions.Parent = OptionsFrame
@@ -620,7 +608,7 @@ function SimpleKavo.CreateLib(title, themeName)
                         NoOptions.ZIndex = 9
                         return
                     end
-
+                  
                     for i, option in ipairs(options) do
                         local OptionButton = Instance.new("TextButton")
                         OptionButton.Name = tostring(option)
@@ -634,11 +622,11 @@ function SimpleKavo.CreateLib(title, themeName)
                         OptionButton.TextSize = 14
                         OptionButton.AutoButtonColor = false
                         OptionButton.ZIndex = 9
-
+                      
                         local OptionCorner = Instance.new("UICorner")
                         OptionCorner.CornerRadius = UDim.new(0, 4)
                         OptionCorner.Parent = OptionButton
-
+                      
                         OptionButton.MouseButton1Click:Connect(function()
                             selectedOption = option
                             MainButton.Text = name..": "..tostring(selectedOption)
@@ -649,7 +637,7 @@ function SimpleKavo.CreateLib(title, themeName)
                             Tween(Arrow, {Rotation = 0}, 0.2)
                             if callback then callback(option) end
                         end)
-
+                      
                         OptionButton.MouseEnter:Connect(function()
                             Tween(OptionButton, {BackgroundColor3 = Color3.fromRGB(
                                 math.floor(currentTheme.ElementColor.R * 255 + 20),
@@ -657,15 +645,15 @@ function SimpleKavo.CreateLib(title, themeName)
                                 math.floor(currentTheme.ElementColor.B * 255 + 20)
                             )}, 0.1)
                         end)
-
+                      
                         OptionButton.MouseLeave:Connect(function()
                             Tween(OptionButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.1)
                         end)
                     end
                 end
-
+              
                 createOptions()
-
+              
                 local function toggleDropdown()
                     isOpen = not isOpen
                     Tween(Arrow, {Rotation = isOpen and 180 or 0}, 0.2)
@@ -682,9 +670,9 @@ function SimpleKavo.CreateLib(title, themeName)
                         OptionsFrame.Visible = false
                     end
                 end
-
+              
                 MainButton.MouseButton1Click:Connect(toggleDropdown)
-
+              
                 local dropdownConnection
                 dropdownConnection = UserInputService.InputBegan:Connect(function(input)
                     if input.UserInputType == Enum.UserInputType.MouseButton1 and isOpen then
@@ -697,11 +685,11 @@ function SimpleKavo.CreateLib(title, themeName)
                         end
                     end
                 end)
-
+              
                 DropdownFrame.Destroying:Connect(function()
-                    if dropdownConnection then dropdownConnection:Disconnect() end
+                    dropdownConnection:Disconnect()
                 end)
-
+              
                 local dropdownMethods = {}
                 function dropdownMethods:Set(newOption)
                     if table.find(options, newOption) then
@@ -719,24 +707,25 @@ function SimpleKavo.CreateLib(title, themeName)
                     createOptions()
                     if isOpen then toggleDropdown() end
                 end
-
+              
                 DropdownFrame.Parent = SectionContent
                 for name, func in pairs(dropdownMethods) do
                     DropdownFrame[name] = func
                 end
-
+              
                 return DropdownFrame
             end
-
+          
             function SectionFunctions:NewTextBox(name, placeholder, callback)
                 local elementOrder = #SectionContent:GetChildren()
+              
                 local TextBoxFrame = Instance.new("Frame")
                 TextBoxFrame.Name = name .. "_TextBox"
                 TextBoxFrame.BackgroundTransparency = 1
                 TextBoxFrame.Size = UDim2.new(1, 0, 0, 35)
                 TextBoxFrame.LayoutOrder = elementOrder
                 TextBoxFrame.ZIndex = 6
-
+              
                 local TextBox = Instance.new("TextBox")
                 TextBox.Name = "Input"
                 TextBox.Parent = TextBoxFrame
@@ -752,11 +741,11 @@ function SimpleKavo.CreateLib(title, themeName)
                 TextBox.TextTruncate = Enum.TextTruncate.AtEnd
                 TextBox.ClearTextOnFocus = false
                 TextBox.ZIndex = 7
-
+              
                 local TextBoxCorner = Instance.new("UICorner")
                 TextBoxCorner.CornerRadius = UDim.new(0, 4)
                 TextBoxCorner.Parent = TextBox
-
+              
                 local TextBoxLabel = Instance.new("TextLabel")
                 TextBoxLabel.Name = "Label"
                 TextBoxLabel.Parent = TextBoxFrame
@@ -769,27 +758,29 @@ function SimpleKavo.CreateLib(title, themeName)
                 TextBoxLabel.TextSize = 12
                 TextBoxLabel.TextXAlignment = Enum.TextXAlignment.Left
                 TextBoxLabel.ZIndex = 7
-
+              
                 TextBox.MouseEnter:Connect(function()
-                    Tween(TextBox, {BackgroundColor3 = Color3.fromRGB(
-                        math.floor(currentTheme.ElementColor.R * 255 + 20),
-                        math.floor(currentTheme.ElementColor.G * 255 + 20),
-                        math.floor(currentTheme.ElementColor.B * 255 + 20)
-                    )}, 0.1)
+                    Tween(TextBox, {
+                        BackgroundColor3 = Color3.fromRGB(
+                            math.floor(currentTheme.ElementColor.R * 255 + 20),
+                            math.floor(currentTheme.ElementColor.G * 255 + 20),
+                            math.floor(currentTheme.ElementColor.B * 255 + 20)
+                        )
+                    }, 0.1)
                 end)
-
+              
                 TextBox.MouseLeave:Connect(function()
                     Tween(TextBox, {BackgroundColor3 = currentTheme.ElementColor}, 0.1)
                 end)
-
+              
                 TextBox.FocusLost:Connect(function(enterPressed)
                     if enterPressed and callback then
                         callback(TextBox.Text)
                     end
                 end)
-
+              
                 TextBoxFrame.Parent = SectionContent
-
+              
                 local textBoxMethods = {}
                 function textBoxMethods:Set(newText)
                     TextBox.Text = tostring(newText)
@@ -798,23 +789,24 @@ function SimpleKavo.CreateLib(title, themeName)
                 function textBoxMethods:Get()
                     return TextBox.Text
                 end
-
+              
                 for name, func in pairs(textBoxMethods) do
                     TextBoxFrame[name] = func
                 end
-
+              
                 return TextBoxFrame
             end
-
-                        function SectionFunctions:NewSlider(name, min, max, default, callback)
+          
+            function SectionFunctions:NewSlider(name, min, max, default, callback)
                 local elementOrder = #SectionContent:GetChildren()
+              
                 local SliderFrame = Instance.new("Frame")
                 SliderFrame.Name = name.."_Slider"
                 SliderFrame.BackgroundTransparency = 1
                 SliderFrame.Size = UDim2.new(1, 0, 0, 50)
                 SliderFrame.LayoutOrder = elementOrder
                 SliderFrame.ZIndex = 6
-
+              
                 local SliderText = Instance.new("TextLabel")
                 SliderText.Name = "Text"
                 SliderText.Parent = SliderFrame
@@ -826,7 +818,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 SliderText.TextSize = 14
                 SliderText.TextXAlignment = Enum.TextXAlignment.Left
                 SliderText.ZIndex = 7
-
+              
                 local SliderBar = Instance.new("Frame")
                 SliderBar.Name = "Bar"
                 SliderBar.Parent = SliderFrame
@@ -834,184 +826,184 @@ function SimpleKavo.CreateLib(title, themeName)
                 SliderBar.Size = UDim2.new(1, 0, 0.2, 0)
                 SliderBar.Position = UDim2.new(0, 0, 0.6, 0)
                 SliderBar.ZIndex = 7
-
+              
                 local SliderCorner = Instance.new("UICorner")
                 SliderCorner.Parent = SliderBar
-
+              
                 local SliderFill = Instance.new("Frame")
                 SliderFill.Name = "Fill"
                 SliderFill.Parent = SliderBar
                 SliderFill.BackgroundColor3 = currentTheme.SchemeColor
                 SliderFill.Size = UDim2.new((default - min)/(max - min), 0, 1, 0)
                 SliderFill.ZIndex = 8
-
+              
                 local SliderFillCorner = Instance.new("UICorner")
                 SliderFillCorner.Parent = SliderFill
-
+              
                 local dragging = false
-
+              
                 local function UpdateSlider(value)
                     local percent = math.clamp((value - min)/(max - min), 0, 1)
                     Tween(SliderFill, {Size = UDim2.new(percent, 0, 1, 0)}, 0.1)
                     SliderText.Text = name..": "..math.floor(value)
                     if callback then callback(value) end
                 end
-
+              
                 SliderBar.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         dragging = true
                     end
                 end)
-
+              
                 SliderBar.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         dragging = false
                     end
                 end)
-
+              
                 UserInputService.InputChanged:Connect(function(input)
-                    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                         local pos = input.Position.X - SliderBar.AbsolutePosition.X
                         local percent = math.clamp(pos/SliderBar.AbsoluteSize.X, 0, 1)
                         local value = min + (max - min) * percent
                         UpdateSlider(value)
                     end
                 end)
-
+              
                 SliderFrame.Parent = SectionContent
                 return SliderFrame
-            end  -- <<< ESTE end FECHA O NewSlider
+            end
+        end
 
-            -- <<< AQUI COMEÇA O NewKeybind (FORA do Slider!)
+                    -- ... (NewSlider fica aqui antes)
+
             function SectionFunctions:NewKeybind(name, defaultKey, callback)
-    -- Contador manual para LayoutOrder
-    local elementOrder = 0
-    for _, child in SectionContent:GetChildren() do
-        if child:IsA("Frame") or child:IsA("TextButton") then
-            elementOrder = math.max(elementOrder, child.LayoutOrder or 0)
-        end
-    end
-    elementOrder += 1
+                local elementOrder = #SectionContent:GetChildren()
+                local currentKey = defaultKey or Enum.KeyCode.Unknown
+                local listening = false
 
-    local currentKey = defaultKey or Enum.KeyCode.Unknown
-    local listening = false
+                local KeybindFrame = Instance.new("Frame")
+                KeybindFrame.Name = name .. "_Keybind"
+                KeybindFrame.BackgroundTransparency = 1
+                KeybindFrame.Size = UDim2.new(1, 0, 0, 35)
+                KeybindFrame.LayoutOrder = elementOrder
+                KeybindFrame.ZIndex = 6
 
-    local KeybindFrame = Instance.new("Frame")
-    KeybindFrame.Name = name .. "_Keybind"
-    KeybindFrame.BackgroundTransparency = 1
-    KeybindFrame.Size = UDim2.new(1, 0, 0, 35)
-    KeybindFrame.LayoutOrder = elementOrder
-    KeybindFrame.ZIndex = 6
+                local KeybindLabel = Instance.new("TextLabel")
+                KeybindLabel.Name = "Label"
+                KeybindLabel.Parent = KeybindFrame
+                KeybindLabel.BackgroundTransparency = 1
+                KeybindLabel.Size = UDim2.new(0.6, 0, 1, 0)
+                KeybindLabel.Position = UDim2.new(0, 5, 0, 0)
+                KeybindLabel.Font = Enum.Font.Gotham
+                KeybindLabel.Text = name
+                KeybindLabel.TextColor3 = currentTheme.TextColor
+                KeybindLabel.TextSize = 14
+                KeybindLabel.TextXAlignment = Enum.TextXAlignment.Left
+                KeybindLabel.ZIndex = 7
 
-    local KeybindLabel = Instance.new("TextLabel")
-    KeybindLabel.Name = "Label"
-    KeybindLabel.Parent = KeybindFrame
-    KeybindLabel.BackgroundTransparency = 1
-    KeybindLabel.Size = UDim2.new(0.6, 0, 1, 0)
-    KeybindLabel.Position = UDim2.new(0, 5, 0, 0)
-    KeybindLabel.Font = Enum.Font.Gotham
-    KeybindLabel.Text = name
-    KeybindLabel.TextColor3 = currentTheme.TextColor
-    KeybindLabel.TextSize = 14
-    KeybindLabel.TextXAlignment = Enum.TextXAlignment.Left
-    KeybindLabel.ZIndex = 7
+                local KeybindButton = Instance.new("TextButton")
+                KeybindButton.Name = "KeybindButton"
+                KeybindButton.Parent = KeybindFrame
+                KeybindButton.BackgroundColor3 = currentTheme.ElementColor
+                KeybindButton.Size = UDim2.new(0, 80, 0, 30)
+                KeybindButton.Position = UDim2.new(1, -85, 0, 2.5)
+                KeybindButton.Font = Enum.Font.Gotham
+                KeybindButton.Text = currentKey ~= Enum.KeyCode.Unknown and currentKey.Name or "..."
+                KeybindButton.TextColor3 = currentTheme.TextColor
+                KeybindButton.TextSize = 14
+                KeybindButton.AutoButtonColor = false
+                KeybindButton.ZIndex = 7
 
-    local KeybindButton = Instance.new("TextButton")
-    KeybindButton.Name = "KeybindButton"
-    KeybindButton.Parent = KeybindFrame
-    KeybindButton.BackgroundColor3 = currentTheme.ElementColor
-    KeybindButton.Size = UDim2.new(0, 80, 0, 30)
-    KeybindButton.Position = UDim2.new(1, -85, 0, 2.5)
-    KeybindButton.Font = Enum.Font.Gotham
-    KeybindButton.Text = currentKey ~= Enum.KeyCode.Unknown and currentKey.Name or "..."
-    KeybindButton.TextColor3 = currentTheme.TextColor
-    KeybindButton.TextSize = 14
-    KeybindButton.AutoButtonColor = false
-    KeybindButton.ZIndex = 7
+                local KeybindCorner = Instance.new("UICorner")
+                KeybindCorner.CornerRadius = UDim.new(0, 4)
+                KeybindCorner.Parent = KeybindButton
 
-    local KeybindCorner = Instance.new("UICorner")
-    KeybindCorner.CornerRadius = UDim.new(0, 4)
-    KeybindCorner.Parent = KeybindButton
+                KeybindButton.MouseEnter:Connect(function()
+                    if not listening then
+                        Tween(KeybindButton, {
+                            BackgroundColor3 = Color3.fromRGB(
+                                math.floor(currentTheme.ElementColor.R * 255 + 20),
+                                math.floor(currentTheme.ElementColor.G * 255 + 20),
+                                math.floor(currentTheme.ElementColor.B * 255 + 20)
+                            )
+                        }, 0.1)
+                    end
+                end)
 
-    -- Hover effects
-    KeybindButton.MouseEnter:Connect(function()
-        if not listening then
-            Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor:lerp(Color3.new(1,1,1), 0.1)}, 0.1)
-        end
-    end)
+                KeybindButton.MouseLeave:Connect(function()
+                    if not listening then
+                        Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.1)
+                    end
+                end)
 
-    KeybindButton.MouseLeave:Connect(function()
-        if not listening then
-            Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.1)
-        end
-    end)
+                local captureConnection
+                local triggerConnection
 
-    local captureConnection
-    local triggerConnection
+                local function updateTriggerConnection()
+                    if triggerConnection then triggerConnection:Disconnect() end
+                    if currentKey == Enum.KeyCode.Unknown then return end
+                    triggerConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                        if not gameProcessed and input.KeyCode == currentKey then
+                            if callback then callback(currentKey) end
+                        end
+                    end)
+                end
 
-    local function updateTrigger()
-        if triggerConnection then triggerConnection:Disconnect() end
-        if currentKey == Enum.KeyCode.Unknown then return end
-        triggerConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-            if gameProcessed then return end
-            if input.KeyCode == currentKey then
-                task.spawn(callback, currentKey)
+                KeybindButton.MouseButton1Click:Connect(function()
+                    listening = true
+                    KeybindButton.Text = "..."
+                    Tween(KeybindButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
+
+                    if captureConnection then captureConnection:Disconnect() end
+                    captureConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                        if listening and not gameProcessed and input.UserInputType == Enum.UserInputType.Keyboard then
+                            currentKey = input.KeyCode
+                            KeybindButton.Text = currentKey.Name
+                            listening = false
+                            Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.2)
+                            captureConnection:Disconnect()
+                            updateTriggerConnection()
+                            if callback then callback(currentKey) end
+                        end
+                    end)
+                end)
+
+                updateTriggerConnection()
+
+                KeybindFrame.Destroying:Connect(function()
+                    if captureConnection then captureConnection:Disconnect() end
+                    if triggerConnection then triggerConnection:Disconnect() end
+                end)
+
+                KeybindFrame.Parent = SectionContent
+
+                local keybindMethods = {}
+                function keybindMethods:Set(newKey)
+                    if typeof(newKey) == "EnumItem" and newKey.EnumType == Enum.KeyCode then
+                        currentKey = newKey
+                        KeybindButton.Text = newKey.Name
+                        updateTriggerConnection()
+                    end
+                end
+                function keybindMethods:Get()
+                    return currentKey
+                end
+
+                for name, func in pairs(keybindMethods) do
+                    KeybindFrame[name] = func
+                end
+
+                return KeybindFrame
             end
-        end)
-    end
 
-    KeybindButton.MouseButton1Click:Connect(function()
-        listening = true
-        KeybindButton.Text = "..."
-        Tween(KeybindButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
-
-        if captureConnection then captureConnection:Disconnect() end
-        captureConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-            if gameProcessed then return end
-            if input.UserInputType == Enum.UserInputType.Keyboard then
-                currentKey = input.KeyCode
-                KeybindButton.Text = currentKey.Name
-                listening = false
-                Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.2)
-                captureConnection:Disconnect()
-                updateTrigger()
-                task.spawn(callback, currentKey)
-            end
-        end)
-    end)
-
-    updateTrigger()
-
-    KeybindFrame.Destroying:Connect(function()
-        if captureConnection then captureConnection:Disconnect() end
-        if triggerConnection then triggerConnection:Disconnect() end
-    end)
-
-    -- Parent no final
-    KeybindFrame.Parent = SectionContent
-
-    -- Métodos
-    local methods = {}
-    function methods:Set(key) 
-        if typeof(key) == "EnumItem" and key.EnumType == Enum.KeyCode then
-            currentKey = key
-            KeybindButton.Text = key.Name
-            updateTrigger()
-        end
-    end
-    function methods:Get() return currentKey end
-
-    for k, v in pairs(methods) do KeybindFrame[k] = v end
-
-    return KeybindFrame
-end  -- <<< ESTE end FECHA O NewKeybind
-
+            -- RETORNA NO FINAL!
             return SectionFunctions
-        end  -- <<< ESTE end FECHA O NewSection
-
+        end
+      
         return TabFunctions
     end
-
+  
     return {
         AddTab = SimpleKavo.AddTab,
         ToggleUI = function()
@@ -1033,5 +1025,4 @@ end  -- <<< ESTE end FECHA O NewKeybind
         end
     }
 end
-
 return SimpleKavo
