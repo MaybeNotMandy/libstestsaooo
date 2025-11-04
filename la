@@ -919,7 +919,7 @@ function SimpleKavo.CreateLib(title, themeName)
     KeybindCorner.CornerRadius = UDim.new(0, 4)
     KeybindCorner.Parent = KeybindButton
 
-    -- Hover effect
+    -- Hover
     KeybindButton.MouseEnter:Connect(function()
         if not listening then
             Tween(KeybindButton, {
@@ -938,50 +938,60 @@ function SimpleKavo.CreateLib(title, themeName)
         end
     end)
 
-    -- Iniciar captura de tecla
+    -- Variáveis para conexões
+    local captureConnection
+    local triggerConnection
+
+    -- Função para atualizar a conexão do trigger
+    local function updateTriggerConnection()
+        if triggerConnection then triggerConnection:Disconnect() end
+        if currentKey == Enum.KeyCode.Unknown then return end
+
+        triggerConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if not gameProcessed and input.KeyCode == currentKey then
+                if callback then callback(currentKey) end
+            end
+        end)
+    end
+
+    -- Iniciar captura
     KeybindButton.MouseButton1Click:Connect(function()
         listening = true
         KeybindButton.Text = "..."
         Tween(KeybindButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
-    end)
 
-    -- Capturar tecla
-    local connection
-    connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if listening and not gameProcessed then
-            if input.UserInputType == Enum.UserInputType.Keyboard then
+        if captureConnection then captureConnection:Disconnect() end
+        captureConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if listening and not gameProcessed and input.UserInputType == Enum.UserInputType.Keyboard then
                 currentKey = input.KeyCode
                 KeybindButton.Text = currentKey.Name
                 listening = false
                 Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.2)
-                connection:Disconnect()
+                captureConnection:Disconnect()
+                updateTriggerConnection()
                 if callback then callback(currentKey) end
             end
-        end
+        end)
     end)
 
-    -- Detectar tecla pressionada (em tempo real)
-    local keybindConnection
-    keybindConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if not gameProcessed and input.KeyCode == currentKey and currentKey ~= Enum.KeyCode.Unknown then
-            if callback then callback(currentKey) end
-        end
-    end)
+    -- Inicializar trigger
+    updateTriggerConnection()
 
-    -- Limpar conexão ao destruir
+    -- Limpar tudo ao destruir
     KeybindFrame.Destroying:Connect(function()
-        if connection then connection:Disconnect() end
-        if keybindConnection then keybindConnection:Disconnect() end
+        if captureConnection then captureConnection:Disconnect() end
+        if triggerConnection then triggerConnection:Disconnect() end
     end)
 
     KeybindFrame.Parent = SectionContent
 
-    -- Métodos públicos
+    -- Métodos
     local keybindMethods = {}
     function keybindMethods:Set(newKey)
         if typeof(newKey) == "EnumItem" and newKey.EnumType == Enum.KeyCode then
             currentKey = newKey
             KeybindButton.Text = newKey.Name
+            updateTriggerConnection()
         end
     end
     function keybindMethods:Get()
