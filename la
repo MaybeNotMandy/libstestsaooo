@@ -806,7 +806,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 return TextBoxFrame
             end
 
-            function SectionFunctions:NewSlider(name, min, max, default, callback)
+                        function SectionFunctions:NewSlider(name, min, max, default, callback)
                 local elementOrder = #SectionContent:GetChildren()
                 local SliderFrame = Instance.new("Frame")
                 SliderFrame.Name = name.."_Slider"
@@ -858,19 +858,19 @@ function SimpleKavo.CreateLib(title, themeName)
                 end
 
                 SliderBar.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
                         dragging = true
                     end
                 end)
 
                 SliderBar.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
                         dragging = false
                     end
                 end)
 
                 UserInputService.InputChanged:Connect(function(input)
-                    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
                         local pos = input.Position.X - SliderBar.AbsolutePosition.X
                         local percent = math.clamp(pos/SliderBar.AbsoluteSize.X, 0, 1)
                         local value = min + (max - min) * percent
@@ -882,7 +882,7 @@ function SimpleKavo.CreateLib(title, themeName)
                 return SliderFrame
             end
 
-            -- KEYBIND CORRIGIDO E FUNCIONAL
+            -- KEYBIND DENTRO DO ESCOPO!
             function SectionFunctions:NewKeybind(name, defaultKey, callback)
                 local elementOrder = #SectionContent:GetChildren()
                 local currentKey = defaultKey or Enum.KeyCode.Unknown
@@ -925,14 +925,9 @@ function SimpleKavo.CreateLib(title, themeName)
                 KeybindCorner.CornerRadius = UDim.new(0, 4)
                 KeybindCorner.Parent = KeybindButton
 
-                -- Hover
                 KeybindButton.MouseEnter:Connect(function()
                     if not listening then
-                        Tween(KeybindButton, {BackgroundColor3 = Color3.fromRGB(
-                            math.floor(currentTheme.ElementColor.R * 255 + 20),
-                            math.floor(currentTheme.ElementColor.G * 255 + 20),
-                            math.floor(currentTheme.ElementColor.B * 255 + 20)
-                        )}, 0.1)
+                        Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor:lerp(Color3.new(1,1,1), 0.1)}, 0.1)
                     end
                 end)
 
@@ -945,13 +940,12 @@ function SimpleKavo.CreateLib(title, themeName)
                 local captureConnection
                 local triggerConnection
 
-                local function updateTriggerConnection()
+                local function updateTrigger()
                     if triggerConnection then triggerConnection:Disconnect() end
                     if currentKey == Enum.KeyCode.Unknown then return end
-
                     triggerConnection = UserInputService.InputBegan:Connect(function(input)
-                        if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == currentKey then
-                            if callback then callback(currentKey) end
+                        if input.KeyCode == currentKey then
+                            task.spawn(callback, currentKey)
                         end
                     end)
                 end
@@ -960,22 +954,21 @@ function SimpleKavo.CreateLib(title, themeName)
                     listening = true
                     KeybindButton.Text = "..."
                     Tween(KeybindButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
-
                     if captureConnection then captureConnection:Disconnect() end
                     captureConnection = UserInputService.InputBegan:Connect(function(input)
-                        if listening and input.UserInputType == Enum.UserInputType.Keyboard then
+                        if input.UserInputType == Enum.UserInputType.Keyboard then
                             currentKey = input.KeyCode
                             KeybindButton.Text = currentKey.Name
                             listening = false
                             Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.2)
                             captureConnection:Disconnect()
-                            updateTriggerConnection()
-                            if callback then callback(currentKey) end
+                            updateTrigger()
+                            task.spawn(callback, currentKey)
                         end
                     end)
                 end)
 
-                updateTriggerConnection()
+                updateTrigger()
 
                 KeybindFrame.Destroying:Connect(function()
                     if captureConnection then captureConnection:Disconnect() end
@@ -984,21 +977,17 @@ function SimpleKavo.CreateLib(title, themeName)
 
                 KeybindFrame.Parent = SectionContent
 
-                local keybindMethods = {}
-                function keybindMethods:Set(newKey)
-                    if typeof(newKey) == "EnumItem" and newKey.EnumType == Enum.KeyCode then
-                        currentKey = newKey
-                        KeybindButton.Text = newKey == Enum.KeyCode.Unknown and "..." or newKey.Name
-                        updateTriggerConnection()
+                local methods = {}
+                function methods:Set(key) 
+                    if typeof(key) == "EnumItem" and key.EnumType == Enum.KeyCode then
+                        currentKey = key
+                        KeybindButton.Text = key.Name
+                        updateTrigger()
                     end
                 end
-                function keybindMethods:Get()
-                    return currentKey
-                end
+                function methods:Get() return currentKey end
 
-                for name, func in pairs(keybindMethods) do
-                    KeybindFrame[name] = func
-                end
+                for k, v in pairs(methods) do KeybindFrame[k] = v end
 
                 return KeybindFrame
             end
