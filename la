@@ -892,7 +892,6 @@ end
     KeybindLabel.Name = "Label"
     KeybindLabel.Parent = KeybindFrame
     KeybindLabel.BackgroundTransparency = 1
-    KeybindLabel.Position = UDim2.new(0, 0, 0, 0)
     KeybindLabel.Size = UDim2.new(0.6, 0, 1, 0)
     KeybindLabel.Font = Enum.Font.Gotham
     KeybindLabel.Text = name
@@ -918,13 +917,14 @@ end
     ButtonCorner.CornerRadius = UDim.new(0, 4)
     ButtonCorner.Parent = KeybindButton
 
+    -- Hover
     KeybindButton.MouseEnter:Connect(function()
         if not listening then
             Tween(KeybindButton, {
                 BackgroundColor3 = Color3.fromRGB(
-                    math.floor(currentTheme.ElementColor.R * 255 + 20),
-                    math.floor(currentTheme.ElementColor.G * 255 + 20),
-                    math.floor(currentTheme.ElementColor.B * 255 + 20)
+                    math.clamp(currentTheme.ElementColor.R * 255 + 20, 0, 255),
+                    math.clamp(currentTheme.ElementColor.G * 255 + 20, 0, 255),
+                    math.clamp(currentTheme.ElementColor.B * 255 + 20, 0, 255)
                 )
             }, 0.1)
         end
@@ -936,51 +936,46 @@ end
         end
     end)
 
+    -- Clicar para escutar
     KeybindButton.MouseButton1Click:Connect(function()
         listening = true
         KeybindButton.Text = "..."
         Tween(KeybindButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
     end)
 
-    local connection
-    connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    -- 🔧 Escuta global, nunca é desconectada até remover o frame
+    local globalConnection
+    globalConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if listening and not gameProcessed then
+            local newKey = Enum.KeyCode.Unknown
+
             if input.UserInputType == Enum.UserInputType.Keyboard then
-                currentKey = input.KeyCode
+                newKey = input.KeyCode
             elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-                currentKey = Enum.KeyCode.Mouse1
+                newKey = Enum.KeyCode.Mouse1
             elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-                currentKey = Enum.KeyCode.Mouse2
-            else
-                currentKey = Enum.KeyCode.Unknown
+                newKey = Enum.KeyCode.Mouse2
             end
 
+            currentKey = newKey
             KeybindButton.Text = currentKey.Name ~= "Unknown" and currentKey.Name or "[None]"
             Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.2)
             listening = false
-            connection:Disconnect()
 
             if callback then callback(currentKey) end
-        end
-    end)
-
-    local triggerConnection
-    triggerConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if not gameProcessed and input.KeyCode == currentKey then
+        elseif not listening and not gameProcessed and input.KeyCode == currentKey then
             if callback then callback(currentKey) end
         end
     end)
 
     KeybindFrame.AncestryChanged:Connect(function(_, parent)
-        if not parent then
-            if connection then connection:Disconnect() end
-            if triggerConnection then triggerConnection:Disconnect() end
+        if not parent and globalConnection then
+            globalConnection:Disconnect()
         end
     end)
 
     KeybindFrame.Parent = SectionContent
 
-    -- ✅ CORREÇÃO: retorna objeto com .Set() e .Get()
     local keybindObject = {}
     keybindObject.Frame = KeybindFrame
 
@@ -996,6 +991,7 @@ end
 
     return keybindObject
 end
+
            
             return SectionFunctions
         end
