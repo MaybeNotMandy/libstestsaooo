@@ -892,6 +892,7 @@ end
     KeybindLabel.Name = "Label"
     KeybindLabel.Parent = KeybindFrame
     KeybindLabel.BackgroundTransparency = 1
+    KeybindLabel.Position = UDim2.new(0, 0, 0, 0)
     KeybindLabel.Size = UDim2.new(0.6, 0, 1, 0)
     KeybindLabel.Font = Enum.Font.Gotham
     KeybindLabel.Text = name
@@ -917,7 +918,6 @@ end
     ButtonCorner.CornerRadius = UDim.new(0, 4)
     ButtonCorner.Parent = KeybindButton
 
-    -- Hover
     KeybindButton.MouseEnter:Connect(function()
         if not listening then
             Tween(KeybindButton, {
@@ -936,18 +936,16 @@ end
         end
     end)
 
-    -- Clicar para escutar
     KeybindButton.MouseButton1Click:Connect(function()
         listening = true
         KeybindButton.Text = "..."
         Tween(KeybindButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
     end)
 
-    -- 🔧 Escuta global, nunca é desconectada até remover o frame
-    local globalConnection
-    globalConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    -- ✅ Mantém o listener ativo sempre, apenas ignora quando não está escutando
+    local inputConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if listening and not gameProcessed then
-            local newKey = Enum.KeyCode.Unknown
+            local newKey
 
             if input.UserInputType == Enum.UserInputType.Keyboard then
                 newKey = input.KeyCode
@@ -955,27 +953,31 @@ end
                 newKey = Enum.KeyCode.Mouse1
             elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
                 newKey = Enum.KeyCode.Mouse2
+            else
+                newKey = Enum.KeyCode.Unknown
             end
 
             currentKey = newKey
-            KeybindButton.Text = currentKey.Name ~= "Unknown" and currentKey.Name or "[None]"
+            KeybindButton.Text = newKey.Name ~= "Unknown" and newKey.Name or "[None]"
             Tween(KeybindButton, {BackgroundColor3 = currentTheme.ElementColor}, 0.2)
             listening = false
 
             if callback then callback(currentKey) end
-        elseif not listening and not gameProcessed and input.KeyCode == currentKey then
-            if callback then callback(currentKey) end
+        elseif not gameProcessed and input.KeyCode == currentKey then
+            if callback and not listening then callback(currentKey) end
         end
     end)
 
+    -- Cleanup
     KeybindFrame.AncestryChanged:Connect(function(_, parent)
-        if not parent and globalConnection then
-            globalConnection:Disconnect()
+        if not parent and inputConnection then
+            inputConnection:Disconnect()
         end
     end)
 
     KeybindFrame.Parent = SectionContent
 
+    -- ✅ Retorna objeto com métodos Set/Get
     local keybindObject = {}
     keybindObject.Frame = KeybindFrame
 
@@ -991,6 +993,7 @@ end
 
     return keybindObject
 end
+
 
            
             return SectionFunctions
