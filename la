@@ -877,8 +877,33 @@ end
             end
 
             function SectionFunctions:NewKeybind(name, defaultKey, callback)
+
+    -- 🔥 Conversor de string → KeyCode
+    local function StringToKeyCode(str)
+        if typeof(str) ~= "string" then
+            return typeof(str) == "EnumItem" and str or Enum.KeyCode.Unknown
+        end
+
+        -- apelidos simples
+        local alias = {
+            ["ALT"] = "LeftAlt",
+            ["CTRL"] = "LeftControl",
+            ["CONTROL"] = "LeftControl",
+            ["SHIFT"] = "LeftShift",
+            ["MOUSE1"] = "Mouse1",
+            ["MOUSE2"] = "Mouse2",
+        }
+
+        local upper = string.upper(str)
+        if alias[upper] then
+            str = alias[upper]
+        end
+
+        return Enum.KeyCode[str] or Enum.KeyCode.Unknown
+    end
+
     local elementOrder = #SectionContent:GetChildren()
-    local currentKey = defaultKey or Enum.KeyCode.Unknown
+    local currentKey = StringToKeyCode(defaultKey)
     local listening = false
 
     local KeybindFrame = Instance.new("Frame")
@@ -942,7 +967,7 @@ end
         Tween(KeybindButton, {BackgroundColor3 = currentTheme.SchemeColor}, 0.2)
     end)
 
-    -- ✅ Mantém o listener ativo sempre, apenas ignora quando não está escutando
+    -- 🔥 Listener
     local inputConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if listening and not gameProcessed then
             local newKey
@@ -963,6 +988,7 @@ end
             listening = false
 
             if callback then callback(currentKey) end
+
         elseif not gameProcessed and input.KeyCode == currentKey then
             if callback and not listening then callback(currentKey) end
         end
@@ -977,12 +1003,12 @@ end
 
     KeybindFrame.Parent = SectionContent
 
-    -- ✅ Retorna objeto com métodos Set/Get
+    -- 🔥 Objeto de controle (Set/Get)
     local keybindObject = {}
     keybindObject.Frame = KeybindFrame
 
     function keybindObject:Set(newKey)
-        currentKey = newKey or Enum.KeyCode.Unknown
+        currentKey = StringToKeyCode(newKey)
         KeybindButton.Text = currentKey.Name ~= "Unknown" and currentKey.Name or "[None]"
         if callback then callback(currentKey) end
     end
@@ -993,6 +1019,7 @@ end
 
     return keybindObject
 end
+
 
 
            
